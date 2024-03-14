@@ -172,10 +172,9 @@ void Server::check_user(int clientSocket, const std::string&d , std::map<int, Cl
     std::string data = d;
     toUpperCase(data);
     std::vector<std::string> parts = split(data, ' ');
-    if (parts.empty()) return; // No command found
+    if (parts.empty()) return;
 
     std::string command = parts[0];
-    // Remove the command from the vector
     parts.erase(parts.begin());
 
     if (parts.size() < 4) {
@@ -225,11 +224,8 @@ void Server::check_Quit(int clientSocket, const std::string& data, std::map<int,
     std::string reason = "Client quit";
     size_t reasonIndex = data.find(" :");
     if (reasonIndex != std::string::npos) {
-        reason = data.substr(reasonIndex + 2); // Extract reason, skipping " :"
+        reason = data.substr(reasonIndex + 2);
     }
-
-    // Construct the quit message
-    // Client& client = clients_Map[clientSocket];
     std::string quitMessage = ":" + clients_Map[clientSocket].nickname + "!" + clients_Map[clientSocket].username + "@localhost QUIT :" + reason;    
     for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
         if (it->first != clientSocket) {
