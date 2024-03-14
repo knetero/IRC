@@ -1,33 +1,11 @@
-#include <csignal>
-#include <cstddef>
-#include <sys/_types/_fd_def.h>
-#include <sys/poll.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h> 
-#include <cstring> 
-#include <iostream>
-#include <vector>
 #include "server.hpp"
 #include "client.hpp"
-#include <poll.h>
+#include <cstdlib>
+// #include <poll.h>
 
 
-
-int main(int ac , char** av)
+void run_server(Server& server, Client& clients)
 {
-    if (ac != 3) {
-        std::cerr << "Usage: " << av[0] << " <port>" << " <password>"<< std::endl;
-        exit(1);
-    }
-
-    Server server(atoi(av[1]), av[2]);
-    Client clients(server.socketId);
-    // signal(SIGINT, server.signalHandler);
-    // signal(SIGQUIT, server.signalHandler);
-
-
     struct pollfd serverSocket;
     serverSocket.fd = server.serverSocket;
     serverSocket.events = POLLIN;
@@ -36,14 +14,14 @@ int main(int ac , char** av)
     while(server.signal == false)
     {
         int pollCount = poll(server.clientSockets.data(), server.clientSockets.size(), -1);
-        if(pollCount == -1 && server.signal == false){
+        if (pollCount == -1 && server.signal == false){
             std::cerr << "Poll failed" << std::endl;
             exit(1);
         }
         for(size_t i = 0; i < server.clientSockets.size(); i++)
         {
             server.isServerCommand = false;
-            if(server.clientSockets[i].revents & POLLIN)
+            if (server.clientSockets[i].revents & POLLIN)
             {
                 if(server.clientSockets[i].fd == server.serverSocket)
                 {
@@ -68,19 +46,46 @@ int main(int ac , char** av)
                         close(server.clientSockets[i].fd);
                         server.clientSockets.erase(server.clientSockets.begin() + i);
                         clients.clients_Map.erase(server.clientSockets[i].fd);
+                        clients.clientBuffers.erase(server.clientSockets[i].fd);
                         continue;
                     }
-                    server.buffer[bytesRead] = '\0';
-                    std::string str(server.buffer);
-                    server.parse_commands(server.clientSockets[i].fd, server.buffer, clients.clients_Map);
+                    clients.clientBuffers[server.clientSockets[i].fd].append(server.buffer, bytesRead);
+                    size_t newlinepos;
+                    while((newlinepos = clients.clientBuffers[server.clientSockets[i].fd].find("\n")) != std::string::npos) 
+                    {
+                        std::string command = clients.clientBuffers[server.clientSockets[i].fd].substr(0, newlinepos);
+                        server.parse_commands(server.clientSockets[i].fd, command, clients.clients_Map);
+                        clients.clientBuffers[server.clientSockets[i].fd].erase(0, newlinepos + 2);
+                    }
                 }
             }
         }
     }
-    // if(server.signal == true)
-    // {
-    //     clients.close_fd();
-    //     close(server.serverSocket);
-    //     std::cout << "The Server is Closed!" << std::endl;
-    // }
+    if (server.signal == true)
+    {
+        for (size_t i = 0; i < server.clientSockets.size(); i++){
+            if(server.clientSockets[i].fd != server.serverSocket)
+                close(server.clientSockets[i].fd);
+        }
+        clients.close_fd();
+        close(server.serverSocket);
+        std::cout << "The Server is Closed!" << std::endl;
+    }
+}
+
+int main(int ac , char** av)
+{
+    if (ac != 3) {
+        std::cerr << "Usage: " << av[0] << " <port>" << " <password>"<< std::endl;
+        exit(1);
+    }
+    if(!isdigit(*av[1])){
+        std::cerr << "Invalid port number" << std::endl;
+        exit(1);
+    }
+    Server server(atoi(av[1]), av[2]);
+    Client clients(server.socketId);
+    signal(SIGINT, server.signalHandler);
+    // signal(SIGQUIT, server.signalHandler);    
+    run_server(server, clients);
 }

@@ -14,8 +14,10 @@
 #include <string>
 #include "client.hpp"
 #include <fcntl.h>
+#include <sstream>
+#include "replies.hpp"
 
-#define BUFFER 512
+#define BUFFER 1024
 
 class Server {
     public:
@@ -36,17 +38,26 @@ class Server {
         bool isSetNick;
         bool isSetPass;
         bool isSetUser;
+        bool check_CD;
 
         static bool signal;
 
+
         bool initialize();
+        bool sendMessage(int fd, const std::string& message);
         int acceptClient();
         static void signalHandler(int signum);
-        void enter_pass(int clientSocket, const std::string& data);
         bool isCommand(const std::string& data);
         void send_private_message(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
         void parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
-        void sendError(int clientSocket, const std::string& nick, const std::string& command, int errorCode, const std::string& errorMessage);
+        bool sendError(int clientSocket, const std::string& errorMessage);
+        void notifyClients(int clientSocket, std::map<int, Client>& clients_Map);
+        std::string toUpperCase(std::string& str);
+        std::vector<std::string> split(const std::string &s, char delim);
+        void check_Quit(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
+        void sendWelcomeMessages(int clientSocket, std::map<int, Client>& clients_Map);
+        void check_user(int clientSocket, const std::string&data , std::map<int, Client>& clients_Map, Client& client);
+        bool check_Nick(int clientSocket, std::string value,  std::map<int, Client>& clients_Map);
 };
 
 #endif

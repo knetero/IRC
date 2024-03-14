@@ -16,8 +16,10 @@ class Client {
     public:
         std::map<int , Client> clients_Map;
         int clientSocket;
+        std::map<int, std::string> clientBuffers;
         std::string nickname;
         std::string username;
+        std::string realname;
 
         Client();
         Client(int clientSocket);

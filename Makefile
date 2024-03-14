@@ -4,7 +4,7 @@ FLAGS = -g -Wall -Wextra -Werror -std=c++98
 SRCS = main.cpp server.cpp client.cpp
 OBJS = $(SRCS:.cpp=.o)
 NAME = ircserv
-HEADERS = server.hpp  client.hpp
+HEADERS = server.hpp  client.hpp replies.hpp
 
 ###############################
 WHITE		=	"\033[m"
