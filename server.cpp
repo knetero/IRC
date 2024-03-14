@@ -84,10 +84,10 @@ void Server::send_private_message(int clientSocket, const std::string& data, std
     if (spacePos != std::string::npos) {
         std::string target = data.substr(0, spacePos);
         std::string message = data.substr(spacePos + 1);
-        // if(message[0] != ':') {
-        //     sendError(clientSocket, "", "", 412, "No text to send\r\n");
-        //     return;
-        // }
+        if(message[0] != ':') {
+            sendError(clientSocket, ERR_NOTEXTTOSEND(clients_Map[clientSocket].nickname));
+            return;
+        }
         std::string senderNickname;
         std::string senderUsername;
         for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
@@ -112,10 +112,10 @@ void Server::send_private_message(int clientSocket, const std::string& data, std
             send(recipientFd, messageToSend.c_str(), messageToSend.size(), 0);
         }
     }
-    // else {
-    //     sendError(clientSocket, "", "", 412, "No text to send\r\n");
-    //     return;
-    // }
+    else {
+        sendError(clientSocket, ERR_NOTEXTTOSEND(clients_Map[clientSocket].nickname));
+        return;
+    }
 }
 
 bool Server::sendError(int clientSocket, const std::string& errorMessage){
