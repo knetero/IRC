@@ -18,6 +18,7 @@
 #include "replies.hpp"
 
 #define BUFFER 1024
+class Client;
 
 class Server {
     public:
@@ -38,9 +39,8 @@ class Server {
         bool isSetNick;
         bool isSetPass;
         bool isSetUser;
-        bool check_CD;
-
         static bool signal;
+        int welcome_msg;
 
 
         bool initialize();
@@ -51,7 +51,7 @@ class Server {
         void send_private_message(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
         void parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
         bool sendError(int clientSocket, const std::string& errorMessage);
-        void notifyClients(int clientSocket, std::map<int, Client>& clients_Map);
+        void notifyClients(int clientSocket, std::map<int, Client>& clients_Map, std::string oldNick);
         std::string toUpperCase(std::string& str);
         std::vector<std::string> split(const std::string &s, char delim);
         void check_Quit(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);

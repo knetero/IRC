@@ -3,6 +3,7 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdlib>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,7 @@ Server::Server(int port, const std::string& password){
     this->isSetNick  = false;
     this->isSetPass = false;
     this->isSetUser = false;
+    this->welcome_msg = 1;
 }
 bool Server::signal = false;
 void Server::signalHandler(int signum){
@@ -147,11 +149,11 @@ bool Server::isCommand(const std::string& data)
     return false;
 }
 
-void Server::notifyClients(int clientSocket, std::map<int, Client>& clients_Map){
-    std::string message = ":" + clients_Map[clientSocket].nickname + "!" + clients_Map[clientSocket].username + "@localhost NICK " + clients_Map[clientSocket].nickname + "\r\n";
+void Server::notifyClients(int clientSocket, std::map<int, Client>& clients_Map, std::string oldNick){
+    std::string nickChangeMsg = RPL_NICKCHANGE(oldNick, clients_Map[clientSocket].nickname);
     for(std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
         if(it->first != clientSocket) {
-            send(it->first, message.c_str(), message.size(), 0);
+            send(it->first, nickChangeMsg.c_str(), nickChangeMsg.size(), 0);
         }
     }
 }
@@ -181,10 +183,8 @@ void Server::check_user(int clientSocket, const std::string&d , std::map<int, Cl
         sendError(clientSocket, ERR_NOTENOUGHPARAM(clients_Map[clientSocket].nickname));
         return;
     }
-    std::string realName = data.substr(data.find(":", 1) + 1);
-
-    std::string username = parts[0];
-    std::string realname = parts[parts.size() - 1];        
+    std::string username = parts[4];
+    std::string realname = parts[4];        
     clients_Map[clientSocket].username = username;
     clients_Map[clientSocket].realname = realname;
     client.userSet = true;
@@ -221,19 +221,26 @@ void Server::sendWelcomeMessages(int clientSocket, std::map<int, Client>& client
 
 void Server::check_Quit(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map)
 {
-    std::string reason = "Client quit";
-    size_t reasonIndex = data.find(" :");
+    std::string reason = "Quit";
+    size_t reasonIndex = data.find(" ");
     if (reasonIndex != std::string::npos) {
-        reason = data.substr(reasonIndex + 2);
+        reason = data.substr(reasonIndex + 1);
     }
-    std::string quitMessage = ":" + clients_Map[clientSocket].nickname + "!" + clients_Map[clientSocket].username + "@localhost QUIT :" + reason;    
-    for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
-        if (it->first != clientSocket) {
-            sendMessage(it->first, quitMessage);
-        }
-    }
+
+
+    //until we have channels ready to notify the clients that shares the same channel
+
+    // std::string quitMessage = ":" + clients_Map[clientSocket].nickname + "!" + clients_Map[clientSocket].username + "@localhost QUIT :" + reason;    
+    // for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
+    //     if (it->first != clientSocket) {
+    //         sendMessage(it->first, quitMessage);
+    //     }
+    // }
+    std::cout << "Server acknowledges QUIT command." << std::endl;
     close(clientSocket);
     clients_Map.erase(clientSocket);
+
+    //delete client from the channel
 }
 
 bool Server::check_Nick(int clientSocket, std::string value, std::map<int, Client>& clients_Map){
@@ -267,10 +274,6 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
         value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
         value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
         if(upcommand == "NICK") {
-            if(client.nickSet) {
-                sendError(clientSocket, ERR_ALREADYREGISTERED(clients_Map[clientSocket].nickname));
-                return;
-            }
             if(!check_Nick(clientSocket, value, clients_Map))
                 return;
             for(std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
@@ -279,10 +282,13 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
                     return;
                 }
             }
+            std::string oldNick = clients_Map[clientSocket].nickname;
+            clients_Map[clientSocket].nickname = value;
+            if(!oldNick.empty()) {
+                notifyClients(clientSocket, clients_Map, oldNick);
+            }
             isServerCommand = true;
             client.nickSet = true;
-            clients_Map[clientSocket].nickname = value;
-            notifyClients(clientSocket, clients_Map);
         }
         else if(upcommand == "USER") {
 
@@ -319,13 +325,12 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
         {
             check_Quit(clientSocket, data, clients_Map);
             isServerCommand = true;
-            send(clientSocket, "QUIT\r\n", 6, 0);
-            close(clientSocket);
-            clients_Map.erase(clientSocket);
         }
-        if(client.passSet && client.nickSet && client.userSet) {
+        if(client.passSet && client.userSet && client.nickSet) {
             client.isRegistered = true;
-            sendWelcomeMessages(clientSocket, clients_Map);
+            if(welcome_msg == 1)
+                sendWelcomeMessages(clientSocket, clients_Map);
+            welcome_msg++;
         }
     }
     else {
