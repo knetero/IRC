@@ -3,6 +3,14 @@
 #include <cstdlib>
 // #include <poll.h>
 
+void close_all(std::map<int, Client>& clients_Map)
+{
+    for (size_t i = 0; i < clients_Map.size(); i++){
+        close(clients_Map[i].clientSocket);
+    }
+
+}
+
 
 void run_server(Server& server, Client& clients)
 {
@@ -26,6 +34,11 @@ void run_server(Server& server, Client& clients)
                 if(server.clientSockets[i].fd == server.serverSocket)
                 {
                     server.socketId = server.acceptClient();
+                    if(server.socketId == -1){
+                        close_all(clients.clients_Map);
+                        close(server.serverSocket);
+                        exit(0);
+                    }
                     if(server.socketId  != -1){
                         clients.clients_Map[server.socketId] = clients;
                         struct pollfd clientSocket;
@@ -61,16 +74,6 @@ void run_server(Server& server, Client& clients)
             }
         }
     }
-    if (server.signal == true)
-    {
-        for (size_t i = 0; i < server.clientSockets.size(); i++){
-            if(server.clientSockets[i].fd != server.serverSocket)
-                close(server.clientSockets[i].fd);
-        }
-        clients.close_fd();
-        close(server.serverSocket);
-        std::cout << "The Server is Closed!" << std::endl;
-    }
 }
 
 int main(int ac , char** av)
@@ -86,6 +89,5 @@ int main(int ac , char** av)
     Server server(atoi(av[1]), av[2]);
     Client clients(server.socketId);
     signal(SIGINT, server.signalHandler);
-    // signal(SIGQUIT, server.signalHandler);    
     run_server(server, clients);
 }

@@ -30,22 +30,26 @@ void Server::signalHandler(int signum){
 
 }
 
-int Server::acceptClient(){
+int Server::acceptClient() 
+{
     struct sockaddr_in clientAddress;
     socklen_t clientAddressLength = sizeof(clientAddress);
-    std::cout << "Waiting for client connection" << std::endl;
     int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
 
-    if(fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
-        perror("fcntl");
-        exit(1);
+    if (signal) {
+        if (Server::signal) {
+            return -1;
+        }
     }
-    if (clientSocket == -1) {
-        std::cerr << "Failed to accept the client's connection. errno: " << errno << std::endl;
+    // Set the socket to non-blocking mode
+    if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
+        std::cerr << "Failed to set client socket to non-blocking mode." << errno << std::endl;
+        close(clientSocket);
         return -1;
     }
-    std::cout << clientSocket  << " : Client connected" << std::endl;
-    return  clientSocket;
+
+    std::cout << "Client connected FD: " << clientSocket << std::endl;
+    return clientSocket;
 }
 
 bool Server::initialize()
@@ -169,8 +173,8 @@ std::vector<std::string> Server::split(const std::string &s, char delim) {
     }
     return elems;
 }
+
 void Server::check_user(int clientSocket, const std::string&d , std::map<int, Client>& clients_Map, Client& client){
-    
     std::string data = d;
     toUpperCase(data);
     std::vector<std::string> parts = split(data, ' ');
