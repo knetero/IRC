@@ -40,7 +40,6 @@ class Server {
         bool isSetPass;
         bool isSetUser;
         static bool signal;
-        int welcome_msg;
 
 
         bool initialize();

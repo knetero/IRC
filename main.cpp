@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include "client.hpp"
 #include <cstdlib>
+#include <sys/signal.h>
 // #include <poll.h>
 
 void close_all(std::map<int, Client>& clients_Map)
@@ -8,7 +9,6 @@ void close_all(std::map<int, Client>& clients_Map)
     for (size_t i = 0; i < clients_Map.size(); i++){
         close(clients_Map[i].clientSocket);
     }
-
 }
 
 
@@ -19,10 +19,10 @@ void run_server(Server& server, Client& clients)
     serverSocket.events = POLLIN;
     server.clientSockets.push_back(serverSocket);
 
-    while(server.signal == false)
+    while(true)
     {
         int pollCount = poll(server.clientSockets.data(), server.clientSockets.size(), -1);
-        if (pollCount == -1 && server.signal == false){
+        if (pollCount == -1){
             std::cerr << "Poll failed" << std::endl;
             exit(1);
         }
@@ -37,7 +37,7 @@ void run_server(Server& server, Client& clients)
                     if(server.socketId == -1){
                         close_all(clients.clients_Map);
                         close(server.serverSocket);
-                        exit(0);
+                        // exit(0);
                     }
                     if(server.socketId  != -1){
                         clients.clients_Map[server.socketId] = clients;
@@ -55,11 +55,10 @@ void run_server(Server& server, Client& clients)
                         continue;
                     }
                     if(bytesRead == 0){
-                        std::cout << "Client exiting from the network" << std::endl;
+                        std::cout << "Client exiting from the Server" << std::endl;
                         close(server.clientSockets[i].fd);
                         server.clientSockets.erase(server.clientSockets.begin() + i);
                         clients.clients_Map.erase(server.clientSockets[i].fd);
-                        clients.clientBuffers.erase(server.clientSockets[i].fd);
                         continue;
                     }
                     clients.clientBuffers[server.clientSockets[i].fd].append(server.buffer, bytesRead);
@@ -88,6 +87,6 @@ int main(int ac , char** av)
     }
     Server server(atoi(av[1]), av[2]);
     Client clients(server.socketId);
-    signal(SIGINT, server.signalHandler);
+    // signal(SIGINT, server.signalHandler);
     run_server(server, clients);
 }

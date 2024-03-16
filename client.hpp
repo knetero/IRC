@@ -32,13 +32,9 @@ class Client {
         bool nickSet;
         bool userSet;
         bool isRegistered;
+        int welcome_msg;
 
         int get_client_socket();
-        bool checkRegistration();
-        void close_fd();
-        void close_clients(int clientSocket);
-        void set_false();
-
 };
 
 #endif

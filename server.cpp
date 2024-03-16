@@ -21,7 +21,6 @@ Server::Server(int port, const std::string& password){
     this->isSetNick  = false;
     this->isSetPass = false;
     this->isSetUser = false;
-    this->welcome_msg = 1;
 }
 bool Server::signal = false;
 void Server::signalHandler(int signum){
@@ -35,17 +34,19 @@ int Server::acceptClient()
     struct sockaddr_in clientAddress;
     socklen_t clientAddressLength = sizeof(clientAddress);
     int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
-
-    if (signal) {
-        if (Server::signal) {
-            return -1;
-        }
+    if (clientSocket == -1) {
+        std::cerr << "Failed to accept client connection. errno: " << errno << std::endl;
+        return -1;
     }
+    // if (signal) {
+    //     if (Server::signal) {
+    //         return -1;
+    //     }
+    // }
     // Set the socket to non-blocking mode
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
         std::cerr << "Failed to set client socket to non-blocking mode." << errno << std::endl;
         close(clientSocket);
-        return -1;
     }
 
     std::cout << "Client connected FD: " << clientSocket << std::endl;
@@ -295,7 +296,6 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
             client.nickSet = true;
         }
         else if(upcommand == "USER") {
-
             if(client.userSet) {
                 sendError(clientSocket, ERR_NOTREGISTERED(clients_Map[clientSocket].nickname));
                 return;
@@ -332,9 +332,9 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
         }
         if(client.passSet && client.userSet && client.nickSet) {
             client.isRegistered = true;
-            if(welcome_msg == 1)
+            if(client.welcome_msg == 1)
                 sendWelcomeMessages(clientSocket, clients_Map);
-            welcome_msg++;
+            client.welcome_msg++;
         }
     }
     else {
