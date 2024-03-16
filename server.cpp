@@ -13,7 +13,6 @@ Server::Server(int port, const std::string& password){
     this->password = password;
     if(!initialize()){
         std::cerr << "Failed to initialize the server" << std::endl;
-        // shutdown();
         exit(1);
     }
     std::cout << "Server is running on port " << port << std::endl;
@@ -31,9 +30,9 @@ void Server::signalHandler(int signum){
 
 int Server::acceptClient() 
 {
-    struct sockaddr_in clientAddress;
-    socklen_t clientAddressLength = sizeof(clientAddress);
-    int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
+    struct sockaddr_in clientAddress; // struct that holds the client address
+    socklen_t clientAddressLength = sizeof(clientAddress); // size of the client address struct 
+    int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength); // accept a connection on a socket
     if (clientSocket == -1) {
         std::cerr << "Failed to accept client connection. errno: " << errno << std::endl;
         return -1;
@@ -43,6 +42,7 @@ int Server::acceptClient()
     //         return -1;
     //     }
     // }
+
     // Set the socket to non-blocking mode
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
         std::cerr << "Failed to set client socket to non-blocking mode." << errno << std::endl;
@@ -55,32 +55,40 @@ int Server::acceptClient()
 
 bool Server::initialize()
 {
+    // Create a socket
+    // AF_INET means we are using IPv4
+    // SOCK_STREAM means we are using a TCP connection
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
         std::cerr << "Failed to create a socket. errno: " << errno << std::endl;
         return false;
     }
+    // declare the struct for the server address
+    struct sockaddr_in serverAddress; // struct that holds the server address
+    serverAddress.sin_family = AF_INET; // means we are using IPv4
+    serverAddress.sin_addr.s_addr = INADDR_ANY; // means we will accept connections from any IP address
+    serverAddress.sin_port = htons(port); // means we will accept connections on this port
 
-    struct sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
-    serverAddress.sin_port = htons(port);
-
+    //set the socket to reuse the address
+    // SO_REUSEADDR means that the port can be reused immediately after the socket is closed
+    // SOL_SOCKET is the level of the socket
     int enable = 1;
-    if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1) {
+    if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1) { //
         perror("setsockopt");
         exit(1);
     }
-    if(fcntl(serverSocket, F_SETFL, O_NONBLOCK) < 0) {
+    // set the socket to non-blocking mode
+    if(fcntl(serverSocket, F_SETFL, O_NONBLOCK) < 0) { // F_SETFL means set file status flags
         perror("fcntl");
         exit(1);
     }
-    if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
+    // Bind the socket to the IP address and port
+    if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) { 
         std::cerr << "Failed to bind to port " << port << ". errno: " << errno << std::endl;
         return false;
     }
-
-    if (listen(serverSocket, 5) == -1) {
+    // Mark the socket for listening in
+    if (listen(serverSocket, 5) == -1) { // 5 is the maximum length to which the queue of pending connections for serverSocket may grow
         std::cerr << "Failed to listen on socket. errno: " << errno << std::endl;
         return false;
     }
@@ -97,7 +105,7 @@ void Server::send_private_message(int clientSocket, const std::string& data, std
         }
         std::string senderNickname;
         std::string senderUsername;
-        for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
+        for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) { 
             if (it->first == clientSocket) {
                 senderNickname = it->second.nickname;
                 senderUsername = it->second.username;
@@ -125,8 +133,8 @@ void Server::send_private_message(int clientSocket, const std::string& data, std
     }
 }
 
-bool Server::sendError(int clientSocket, const std::string& errorMessage){
-     if (!sendMessage(clientSocket, errorMessage)) {
+bool Server::sendError(int clientSocket, const std::string& errorMessage){ //
+     if (!sendMessage(clientSocket, errorMessage)) { //
         std::cerr << "Error sending message: " << errorMessage << std::endl;
         return false;
     }
@@ -139,7 +147,7 @@ bool Server::isCommand(const std::string& data)
 
     if(command.find(" ") != std::string::npos)
         command = command.substr(0, command.find(" "));
-    command.erase(0, command.find_first_not_of(" \n\r\t\f\v"));
+    command.erase(0, command.find_first_not_of(" \n\r\t\f\v")); // remove leading whitespace
     command.erase(command.find_last_not_of(" \n\r\t\f\v") + 1);
 
 
@@ -167,9 +175,9 @@ std::vector<std::string> Server::split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     std::stringstream ss(s);
     std::string item;
-    while (std::getline(ss, item, delim)) {
+    while (std::getline(ss, item, delim)) { // getline reads characters from the input stream and places them into a string until the delimeter is found
         if (!item.empty()) {
-            elems.push_back(item);
+            elems.push_back(item); 
         }
     }
     return elems;
@@ -178,7 +186,7 @@ std::vector<std::string> Server::split(const std::string &s, char delim) {
 void Server::check_user(int clientSocket, const std::string&d , std::map<int, Client>& clients_Map, Client& client){
     std::string data = d;
     toUpperCase(data);
-    std::vector<std::string> parts = split(data, ' ');
+    std::vector<std::string> parts = split(data, ' '); // split the string into parts
     if (parts.empty()) return;
 
     std::string command = parts[0];
@@ -197,7 +205,7 @@ void Server::check_user(int clientSocket, const std::string&d , std::map<int, Cl
 
 bool Server::sendMessage(int fd, const std::string& message) {
     std::string formattedMessage = message;
-    if (formattedMessage.back() != '\n') {
+    if (formattedMessage.back() != '\n') { 
         formattedMessage += "\r\n";
     }
 
