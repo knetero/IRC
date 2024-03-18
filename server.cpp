@@ -196,10 +196,12 @@ void Server::check_user(int clientSocket, const std::string&d , std::map<int, Cl
         sendError(clientSocket, ERR_NOTENOUGHPARAM(clients_Map[clientSocket].nickname));
         return;
     }
-    std::string username = parts[4];
+    std::string username = parts[0];
     std::string realname = parts[4];        
     clients_Map[clientSocket].username = username;
     clients_Map[clientSocket].realname = realname;
+
+
     client.userSet = true;
 }
 
