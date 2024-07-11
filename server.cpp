@@ -441,7 +441,7 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
                 std::cout<<"problem on channel name "<<std::endl;
                 while((getline(ss, ch, ',') && ch[0] != '#' ));
             }
-            // if(ch[0] == '#')
+            if(ch[0] == '#')
             {
                 map_channels[ch] = "-1"; 
                 std::cout << ch <<" : "<< "|"<< p <<"|"<< std::endl;
@@ -485,7 +485,6 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
             //     std::cout << itt->first << "|||||||" << std::endl;
             // }
 }
-
 
 
 /************************************************MODE***************************************************************/
