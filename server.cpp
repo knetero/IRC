@@ -1,7 +1,8 @@
-#include "server.hpp"
 #include "client.hpp"
+#include "channel.hpp"
 #include <cctype>
 #include <cstddef>
+#include "server.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -20,7 +21,8 @@ Server::Server(int port, const std::string& password){
     this->isSetNick  = false;
     this->isSetPass = false;
     this->isSetUser = false;
-}
+
+}        
 bool Server::signal = false;
 void Server::signalHandler(int signum){
     (void)signum;
@@ -271,8 +273,11 @@ bool Server::check_Nick(int clientSocket, std::string value, std::map<int, Clien
 }
 
 
+
 void Server::parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map){
 
+    // Channel defaultChannel;
+    // Channel nameChannel("server_Channels");
     if(isCommand(data) == false){
         isServerCommand = true;
         sendError(clientSocket, ERR_CMDNOTFOUND(clients_Map[clientSocket].nickname, data));
@@ -340,6 +345,11 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
             check_Quit(clientSocket, data, clients_Map);
             isServerCommand = true;
         }
+        else if (upcommand == "JOIN")
+        {
+           join(value, clientSocket, clients_Map);
+            // join(value);
+        }
         if(client.passSet && client.userSet && client.nickSet) {
             client.isRegistered = true;
             if(client.welcome_msg == 1)
@@ -364,4 +374,121 @@ std::string Server::toUpperCase(std::string& str) {
 
 Server::~Server(){
     // shutdown();
+}
+
+/************************************************JOIN***************************************************************/
+
+int check_properties(Channel channel, std::string mdp, int clientsocket)
+{
+    if (channel.getmodes().find("+k") != std::string::npos) {
+        std::cout << "The string contains '+k'" << std::endl;
+        std::cout << channel.getpassword() << "        "<< mdp<<std::endl;
+        if (channel.getpassword().compare(mdp) != 0)
+        {
+            std::cout << "mdp incorrect" << std::endl;
+            return(1);
+        }
+    }
+        if (channel.getmodes().find("+l") && channel.getSize() - channel.getlimit() <= 0)
+        {
+            std::cout << "size incorrect" << std::endl;
+            return(1);
+        }
+        if(channel.getmodes().find("+i"))
+        {
+            if (channel.getinvited().find(clientsocket) == channel.getinvited().end())
+            {
+                std::cout << "client not invited" << std::endl;
+                return(1);
+            }
+        }
+    return (0);     
+}
+void Server::join(std::string value, int clientsocket, std::map<int, Client>& clients_Map)
+{
+    (void)clientsocket;
+    std::istringstream iss(value);
+    std::map<std::string, std::string> map_channels;
+    std::string channels;
+    std::string ch_name;
+    std::string password;
+    std::string p;
+    std::string ch;
+    std::getline(iss, channels, ' ');
+    std::stringstream ss(strTrim( channels , " ")); 
+        password = value.substr( value.find(" ") + 1,value.size());
+        std::stringstream pa(strTrim( password , " "));
+    if(value.find(" ") != std::string::npos)
+    {
+        while (getline(pa, p, ',') && getline(ss, ch, ',') )
+        {
+            if(ch[0] != '#')
+            {
+                std::cout<<"problem on channel name "<<std::endl;
+                while((getline(ss, ch, ',') && ch[0] != '#' ));
+            }
+            if(ch[0] == '#')
+            {
+                map_channels[ch] = p; 
+                std::cout << ch <<" : "<< "|"<< p <<"|"<< std::endl;
+            }
+        }
+    }
+        while (getline(ss, ch, ','))
+        {
+            if(ch[0] != '#')
+            {
+                std::cout<<"problem on channel name "<<std::endl;
+                while((getline(ss, ch, ',') && ch[0] != '#' ));
+            }
+            // if(ch[0] == '#')
+            {
+                map_channels[ch] = "-1"; 
+                std::cout << ch <<" : "<< "|"<< p <<"|"<< std::endl;
+            }
+        }
+    std::map<std::string, std::string>::iterator it;
+    std::map<std::string, std::string>::iterator element;
+    for (it = map_channels.begin(); it != map_channels.end(); ++it) {
+        std::map<std::string, Channel>::iterator element = server_channels.find(it->first.substr(1));
+        if (element != server_channels.end()) {
+            std::cout << "Channel exists:  So add the user to that channel after cheking properties" << std::endl;
+            std::cout << "pass: " << it->second << std::endl;
+            if (check_properties( element->second,  map_channels[it->first], clientsocket) == 0)
+            {
+                element->second.add_user(clients_Map[clientsocket], clientsocket, 0) ;
+                element->second.setSize(element->second.getSize()+1);
+            }
+            else
+            {
+                return;
+            }
+        }
+        else {
+            std::cout << "Create this channel" << std::endl;
+            //leaks here
+            Channel chn = Channel();
+            chn.setName(it->first.substr(1));
+            if (map_channels[it->first].compare("-1") != 0)
+            {
+                chn.setpassword(map_channels[it->first]);
+                chn.setmodes("+k");
+            }
+            server_channels.insert ( std::pair<std::string,Channel>(it->first.substr(1),chn));
+            server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 1);
+            server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 0);
+            chn.setSize(chn.getSize()+1);
+        }
+    }
+            std::map<std::string, Channel>::iterator itt;
+            // for (itt = server_channels.begin(); itt != server_channels.end(); ++itt) {
+            //     std::cout << itt->first << "|||||||" << std::endl;
+            // }
+}
+
+
+
+/************************************************MODE***************************************************************/
+void Server::mod(Channel channel)
+{
 }

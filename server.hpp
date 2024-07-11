@@ -16,13 +16,14 @@
 #include <fcntl.h>
 #include <sstream>
 #include "replies.hpp"
-
+#include "channel.hpp"
 #define BUFFER 1024
 class Client;
-
+class Channel;
 class Server {
     public:
         Server(int port, const std::string& password);
+        std::map<std::string, Channel> server_channels;
         // Server(const Server& other);
         // Server& operator=(const Server& other);
         ~Server();
@@ -35,7 +36,7 @@ class Server {
         bool isRunning;
         bool isServerCommand;
         char buffer[BUFFER];
-
+        
         bool isSetNick;
         bool isSetPass;
         bool isSetUser;
@@ -57,6 +58,9 @@ class Server {
         void sendWelcomeMessages(int clientSocket, std::map<int, Client>& clients_Map);
         void check_user(int clientSocket, const std::string&data , std::map<int, Client>& clients_Map, Client& client);
         bool check_Nick(int clientSocket, std::string value,  std::map<int, Client>& clients_Map);
+    
+        void join(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
+        void mod(Channel channel);
 };
 
 #endif
