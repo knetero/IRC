@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 Server::Server(int port, const std::string& password){
     this->port = port;
@@ -350,6 +351,10 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
            join(value, clientSocket, clients_Map);
             // join(value);
         }
+        else if (upcommand == "MODE")
+        {
+           mod(value, clientSocket,  clients_Map);
+        }
         if(client.passSet && client.userSet && client.nickSet) {
             client.isRegistered = true;
             if(client.welcome_msg == 1)
@@ -406,7 +411,7 @@ int check_properties(Channel channel, std::string mdp, int clientsocket)
 }
 void Server::join(std::string value, int clientsocket, std::map<int, Client>& clients_Map)
 {
-    (void)clientsocket;
+    // (void)clientsocket;
     std::istringstream iss(value);
     std::map<std::string, std::string> map_channels;
     std::string channels;
@@ -444,7 +449,7 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
             if(ch[0] == '#')
             {
                 map_channels[ch] = "-1"; 
-                std::cout << ch <<" : "<< "|"<< p <<"|"<< std::endl;
+                // std::cout << ch <<" : "<< "|"<< p <<"|"<< std::endl;
             }
         }
     std::map<std::string, std::string>::iterator it;
@@ -472,7 +477,7 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
             if (map_channels[it->first].compare("-1") != 0)
             {
                 chn.setpassword(map_channels[it->first]);
-                chn.setmodes("+k");
+                chn.setmodes("k");
             }
             server_channels.insert ( std::pair<std::string,Channel>(it->first.substr(1),chn));
             server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 1);
@@ -480,7 +485,8 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
             chn.setSize(chn.getSize()+1);
         }
     }
-            std::map<std::string, Channel>::iterator itt;
+    //
+            // std::map<std::string, Channel>::iterator itt;
             // for (itt = server_channels.begin(); itt != server_channels.end(); ++itt) {
             //     std::cout << itt->first << "|||||||" << std::endl;
             // }
@@ -488,6 +494,84 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
 
 
 /************************************************MODE***************************************************************/
-void Server::mod(Channel channel)
+void Server::mod(std::string value, int clientsocket, std::map<int, Client>& clients_Map)
 {
+   (void)clientsocket;
+//    (void)value;
+   (void)clients_Map;
+    std::istringstream iss(value);
+    std::string channel;
+    std::vector<std::string> args;
+    std::vector<std::string> modes;
+            // std::map<std::string, Channel>::iterator itt;
+            // for (itt = server_channels.begin(); itt != server_channels.end(); ++itt) {
+            //     std::cout << itt->first << " |||||| " << itt->second.getpassword()<< std::endl;
+            // }
+
+ 
+    while (std::getline(iss, channel, ' ')) {  
+        if (strTrim( channel , "    ") != "")
+        {
+            args.push_back(strTrim( channel , " "));
+            // std::cout << "|"<< strTrim( channel , " ") << "|"<< std::endl;
+        }
+    } 
+    // for (size_t i = 1; i < args.size() - 1; ++i) {}
+        if (!args[0].empty() && args[0][0] == '#' && server_channels.find(args[0].substr(1)) != server_channels.end())
+        {
+            if ( (args[1][0] == '-' || args[1][0] == '+'))
+            {
+                int i = 0;
+                int j = 0;
+                std::string s;
+                while (args[1][i] && (args[1][i] == '+' || args[1][i] == '-'))
+                {
+                    j = i +1 ;
+                    while(args[1][j] && (args[1][j] != '+' && args[1][j] != '-'))
+                        j++;                                                                    //join #c1,#c2,#c3,c4,#c5 1 22 333 44
+                                                                                                //MODE #c1 +sdjsjf-sfhf 10
+
+                    s = args[1].substr(i  , j - 1);
+                    modes.push_back(s);
+                    i = i+j;
+                }
+                i = 1;
+                std::string ss;
+                while (!modes[i].empty())
+                {
+                    j = 0;
+                    while(modes[i][j])
+                    {
+                        if(server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) != std::string::npos)
+                        {
+                            if (modes[i][0] == '-')
+                            {
+                                ss = server_channels.find(args[0].substr(1))->second.getmodes();
+                                std::cout << ss << " |||||| " << std::endl;
+                                ss.erase(std::remove(ss.begin(), ss.end(), modes[i][j]), ss.end());
+                                std::cout << ss << " |||||| " << std::endl;
+                                server_channels.find(args[0].substr(1))->second.setmodes(ss);
+                                std::cout << ss << " |||||| " << std::endl;
+                            }
+                        }
+                        else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+')
+                        {
+                            ss = server_channels.find(args[0].substr(1))->second.getmodes() + modes[i][j];
+                            server_channels.find(args[0].substr(1))->second.setmodes(ss);
+                                std::cout << server_channels.find(args[0].substr(1))->second.getmodes() << " |||||| " << std::endl;
+                        }
+
+                        j++;
+                    }
+                    i++;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "error channel doesnt exist "<< args[0]<< std::endl;
+            return;
+        }
+    
+    return;
 }
