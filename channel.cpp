@@ -207,6 +207,7 @@ void Channel::add_user(Client c, int clientsocket, int type)
     {
         invited_clients.insert(std::pair<int, Client>(clientsocket,c));
     }
+    
 }
 
 std::string UpperCaseStr(std::string s)

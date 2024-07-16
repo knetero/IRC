@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "replies.hpp"
 
 Server::Server(int port, const std::string& password){
     this->port = port;
@@ -497,7 +498,7 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
 void Server::mod(std::string value, int clientsocket, std::map<int, Client>& clients_Map)
 {
    (void)clientsocket;
-//    (void)value;
+   (void)value;
    (void)clients_Map;
     std::istringstream iss(value);
     std::string channel;
@@ -531,36 +532,33 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>& cli
                         j++;                                                                    //join #c1,#c2,#c3,c4,#c5 1 22 333 44
                                                                                                 //MODE #c1 +sdjsjf-sfhf 10
 
-                    s = args[1].substr(i  , j - 1);
+                    s = args[1].substr(i  , j);
                     modes.push_back(s);
                     i = i+j;
                 }
-                i = 1;
+                i = 0;
                 std::string ss;
-                while (!modes[i].empty())
+                while ((size_t)i < modes.size())      
                 {
-                    j = 0;
+                    j = 1;
                     while(modes[i][j])
                     {
-                        if(server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) != std::string::npos)
+                        if(server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) != std::string::npos && isalpha(modes[i][j]) )
                         {
-                            if (modes[i][0] == '-')
+                            if (modes[i][0] == '-' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket) != server_channels.find(args[0].substr(1))->second.getoperators().end())
                             {
                                 ss = server_channels.find(args[0].substr(1))->second.getmodes();
-                                std::cout << ss << " |||||| " << std::endl;
                                 ss.erase(std::remove(ss.begin(), ss.end(), modes[i][j]), ss.end());
-                                std::cout << ss << " |||||| " << std::endl;
                                 server_channels.find(args[0].substr(1))->second.setmodes(ss);
                                 std::cout << ss << " |||||| " << std::endl;
                             }
                         }
-                        else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+')
+                        else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket) != server_channels.find(args[0].substr(1))->second.getoperators().end() && isalpha(modes[i][j])) 
                         {
                             ss = server_channels.find(args[0].substr(1))->second.getmodes() + modes[i][j];
                             server_channels.find(args[0].substr(1))->second.setmodes(ss);
-                                std::cout << server_channels.find(args[0].substr(1))->second.getmodes() << " |||||| " << std::endl;
+                            std::cout << server_channels.find(args[0].substr(1))->second.getmodes() << " |||||| " << std::endl;
                         }
-
                         j++;
                     }
                     i++;
@@ -569,7 +567,8 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>& cli
         }
         else
         {
-            std::cout << "error channel doesnt exist "<< args[0]<< std::endl;
+            // std::cout << "error channel doesnt exist "<< args[0]<< std::endl;
+            sendError(clientsocket,ERR_NOSUCHCHANNEL(clients_Map[clientsocket].nickname, args[0]));
             return;
         }
     

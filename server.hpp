@@ -17,6 +17,8 @@
 #include <sstream>
 #include "replies.hpp"
 #include "channel.hpp"
+
+
 #define BUFFER 1024
 class Client;
 class Channel;

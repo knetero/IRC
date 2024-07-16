@@ -1,10 +1,10 @@
 CC = c++
 FLAGS = -g -Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp server.cpp client.cpp channel.cpp
+SRCS = main.cpp server.cpp client.cpp channel.cpp convert.cpp
 OBJS = $(SRCS:.cpp=.o)
 NAME = ircserv
-HEADERS = server.hpp  client.hpp replies.hpp channel.hpp
+HEADERS = server.hpp  client.hpp replies.hpp channel.hpp convert.hpp
 
 ###############################
 WHITE		=	"\033[m"
