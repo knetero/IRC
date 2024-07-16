@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include "replies.hpp"
+#include "convert.hpp"
 
 Server::Server(int port, const std::string& password){
     this->port = port;
@@ -504,6 +505,7 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>& cli
     std::string channel;
     std::vector<std::string> args;
     std::vector<std::string> modes;
+    std::string ss;
             // std::map<std::string, Channel>::iterator itt;
             // for (itt = server_channels.begin(); itt != server_channels.end(); ++itt) {
             //     std::cout << itt->first << " |||||| " << itt->second.getpassword()<< std::endl;
@@ -534,10 +536,10 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>& cli
 
                     s = args[1].substr(i  , j);
                     modes.push_back(s);
+                    std::cout << s<< std::endl;
                     i = i+j;
                 }
                 i = 0;
-                std::string ss;
                 while ((size_t)i < modes.size())      
                 {
                     j = 1;
@@ -552,16 +554,59 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>& cli
                                 server_channels.find(args[0].substr(1))->second.setmodes(ss);
                                 std::cout << ss << " |||||| " << std::endl;
                             }
+                            else
+                                std::cout << " client doesnt have operator previlige"<< std::endl;
                         }
                         else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket) != server_channels.find(args[0].substr(1))->second.getoperators().end() && isalpha(modes[i][j])) 
-                        {
-                            ss = server_channels.find(args[0].substr(1))->second.getmodes() + modes[i][j];
-                            server_channels.find(args[0].substr(1))->second.setmodes(ss);
-                            std::cout << server_channels.find(args[0].substr(1))->second.getmodes() << " |||||| " << std::endl;
+                        {   
+                            if (modes[i][j] == 'l')
+                            {
+                                if(!args[2].empty())
+                                {
+                                    if (cast_int(args[2]) != -1)
+                                    {
+                                        std::cout << "args[2]     "<<cast_int(args[2]) << " |||||| " << std::endl;
+                                        server_channels.find(args[0].substr(1))->second.setlimit(cast_int(args[2]));
+                                        args.erase(std::next(args.begin(), 2));
+                                        ss = server_channels.find(args[0].substr(1))->second.getmodes() + modes[i][j];
+                                        server_channels.find(args[0].substr(1))->second.setmodes(ss);
+
+                                    }
+                                    else
+                                        std::cout << " Error on limit number"<< std::endl;
+                                }
+                                else
+                                    std::cout << " Error on number of args"<< std::endl;
+
+                            }
+                            else if (modes[i][j] == 'k' )
+                            {
+                                if ( !args[2].empty())
+                                {
+                                    server_channels.find(args[0].substr(1))->second.setpassword(args[2]);
+                                    ss = server_channels.find(args[0].substr(1))->second.getmodes() + modes[i][j];
+                                    server_channels.find(args[0].substr(1))->second.setmodes(ss);
+                                        std::cout << "args[2]     "<<cast_int(args[2]) << " |||||| " << std::endl;
+                                }
+                                else
+                                    std::cout <<  " Error on number of args" << std::endl;;
+                            }
+                            else if (modes[i][j] == 't' || modes[i][j] == 'i')
+                            {
+                                ss = server_channels.find(args[0].substr(1))->second.getmodes() + modes[i][j];
+                                server_channels.find(args[0].substr(1))->second.setmodes(ss);
+                            }
+                            // else if (modes[i][j] == 'o' && !args[2].empty())
+                            // {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+                            // }
+
+
                         }
                         j++;
                     }
                     i++;
+                                                
                 }
             }
         }
@@ -571,6 +616,6 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>& cli
             sendError(clientsocket,ERR_NOSUCHCHANNEL(clients_Map[clientsocket].nickname, args[0]));
             return;
         }
-    
+        std::cout << "|||||" << ss << "||||||" << std::endl;
     return;
 }

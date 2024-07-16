@@ -5,11 +5,10 @@
 #include <string>
 #include <cstring>
 
-void cast_int(std::string param);
+int cast_int(std::string param);
 bool is_int(std::string param);
 int ft_atoi(std::string str);
-void cast_int(std::string param);
-void convert(std::string param);
+int convert(std::string param);
 
 
 

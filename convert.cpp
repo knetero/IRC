@@ -42,34 +42,19 @@ int ft_atoi(std::string str) {
     return sign * result;
 }
 
-void cast_int(std::string param)
+int cast_int(std::string param)
 {
-    char c = '\0';
     int n;
-    float f;
-    double d;
     
     n = static_cast<int>(ft_atoi(param));
-    c = static_cast<char>(c);
-    if(c < 32 || c == 127)
-        std::cout << "char : " << "Non displayable" << std::endl;
-    else
-        std::cout << "char : " << c << std::endl;
-    if (n > 2147483647 || n < -2147483648)
-        std::cout << "int : " << "Impossible" << std::endl;
-    else
-        std::cout << "int : " << n << std::endl;
-    f = static_cast<float>(c);
-    std::cout << "float : " << f <<".0f"<< std::endl;
-    d = static_cast<double>(c);
-    std::cout << "double : " << d <<".0"<< std::endl;
+    return (n);
 }
 
 
-void convert(std::string param)
+int convert(std::string param)
 {
      if (is_int(param))
-           cast_int(param);
+           return(cast_int(param));
         else
-            return;
+            return(-1);
 }
