@@ -202,6 +202,10 @@ void Channel::add_user(Client c, int clientsocket, int type)
     else if(type == 1 && operators.find(clientsocket) == operators.end())
     {
         operators.insert(std::pair<int, Client>(clientsocket,c));
+            std::map<int, Client>::iterator itt;
+            for (itt = operators.begin(); itt != operators.end(); ++itt) {
+                std::cout << itt->first << std::endl;
+            }
     }
     else if(type == -1 && invited_clients.find(clientsocket) == invited_clients.end())
     {
