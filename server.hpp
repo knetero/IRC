@@ -63,6 +63,7 @@ class Server {
     
         void join(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
         void mod(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
+        int get_nick(std::string chName, std::string nickname);
 };
 
 #endif
