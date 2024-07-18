@@ -527,12 +527,13 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
 
 
     while (std::getline(iss, channel, ' ')) {  
-        if (strTrim( channel , "    ") != "")
+        if (strTrim( channel , " ") != "")
         {
             args.push_back(strTrim( channel , " "));
             // std::cout << "|"<< strTrim( channel , " ") << "|"<< std::endl;
         }
     } 
+        std::cout << " fffff : ||||| " << args.size() << "***"  << std::endl;
             // std::map<int, Client>::iterator itt;
             // // for (itt = server_channels.find(args[0].substr(1))->second.getoperators().begin(); itt != server_channels.find(args[0].substr(1))->second.getoperators().end(); ++itt) {
             //     if (server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket)
@@ -545,7 +546,7 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
     // for (size_t i = 1; i < args.size() - 1; ++i) {}
         if (!args[0].empty() && args[0][0] == '#' && server_channels.find(args[0].substr(1)) != server_channels.end())
         {
-            if ( (args[1][0] == '-' || args[1][0] == '+'))
+            if (!args[1].empty() && (args[1][0] == '-' || args[1][0] == '+'))
             {
                 int i = 0;
                 int j = 0;
@@ -562,7 +563,6 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
                     std::cout << s<< std::endl;
                     i = i+j;
                 }
-        std::cout << " before : |||||" << server_channels.find(args[0].substr(1))->second.getmodes() << "||||||" << std::endl;
                 i = 0;
                 while ((size_t)i < modes.size())      
                 {
@@ -580,11 +580,9 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
                                 server_channels.find(args[0].substr(1))->second.setmodes(ss);
                                 std::cout << ss << " |||||| " << std::endl;
                             }
-                            else
-                                sendError(clientsocket, ERR_CHANOPRIVSNEEDED(clients_Map[clientsocket].nickname, args[0]) );
                         }
-                        else if (args.size() <= 1 && server_channels.find(args[0].substr(1)) != server_channels.end())
-                            sendError(clientsocket, RPL_CHANNELMODEIS(clients_Map[clientsocket].nickname, args[0], server_channels.find(args[0].substr(1))->second.getmodes()) );
+                        else if (server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first != clientsocket)
+                                sendError(clientsocket, ERR_CHANOPRIVSNEEDED(clients_Map[clientsocket].nickname, args[0]) );
                         else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket && isalpha(modes[i][j])) 
                         {   
                             if (modes[i][j] == 'l')
@@ -642,6 +640,9 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
                                                 
                 }
             }
+            else if (args.size() <= 1 && server_channels.find(args[0].substr(1)) != server_channels.end())
+                sendError(clientsocket, RPL_CHANNELMODEIS(clients_Map[clientsocket].nickname, args[0], server_channels.find(args[0].substr(1))->second.getmodes()) );
+
         }
         else
         {
