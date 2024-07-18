@@ -18,5 +18,6 @@
 #define ERR_NOTEXTTOSEND(nickname) (": 412 " + nickname + " :No text to send" + CRLF)
 #define ERR_CHANOPRIVSNEEDED(nickname, channelname) (": 482 " + nickname + " " + channelname + " :You're not channel operator" + CRLF)
 #define ERR_NOSUCHCHANNEL(nickname, channelname) (": 403 " + nickname + " " + channelname +  " :No such channel" + CRLF)
+#define RPL_CHANNELMODEIS(nickname, channelname, modestring) (": 324 " + nickname + " " + channelname +  " : " + modestring + CRLF)
 
 #endif

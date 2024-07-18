@@ -1,7 +1,8 @@
-#include "server.hpp"
+
 #include "client.hpp"
 #include <cstdlib>
 #include <sys/signal.h>
+#include "server.hpp"
 // #include <poll.h>
 
 void close_all(std::map<int, Client>& clients_Map)
