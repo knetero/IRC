@@ -457,11 +457,13 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
         if (element != server_channels.end()) {
             if (check_properties( element->second,  map_channels[it->first], clientsocket, clients_Map) == 0)
             {
-                element->second.add_user(clients_Map[clientsocket], clientsocket, 0);
-                element->second.setSize(element->second.getSize()+1);
-                // if (element->second.getmodes().find("t") != std::string::npos)
-                sendError(clientsocket, RPL_JOIN(clients_Map[clientsocket].nickname, element->first));
-                sendError(clientsocket, RPL_TOPIC(clients_Map[clientsocket].nickname, element->first, element->second.gettopic()));
+                if (element->second.getmembers().find(clientsocket)->first != clientsocket)
+                {
+                    element->second.add_user(clients_Map[clientsocket], clientsocket, 0);
+                    element->second.setSize(element->second.getSize()+1);
+                    sendError(clientsocket, RPL_JOIN(clients_Map[clientsocket].nickname, element->second.getName()));
+                    sendError(clientsocket, RPL_TOPIC(clients_Map[clientsocket].nickname, element->second.getName(), element->second.gettopic()));
+                }
             }
             else
             {
@@ -479,12 +481,12 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
                 chn.setpassword(map_channels[it->first]);
                 chn.setmodes("k");
             }
-            server_channels.insert ( std::pair<std::string,Channel>(it->first.substr(1),chn));
-            server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 1);
-            server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 0);
-            chn.setSize(chn.getSize()+1);
-            sendError(clientsocket, RPL_JOIN(clients_Map[clientsocket].nickname, element->first));
-            sendError(clientsocket, RPL_TOPIC(clients_Map[clientsocket].nickname, element->first, element->second.gettopic()));
+                server_channels.insert ( std::pair<std::string,Channel>(it->first.substr(1),chn));
+                server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 1);
+                server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 0);
+                chn.setSize(chn.getSize()+1);
+                sendError(clientsocket, RPL_JOIN(clients_Map[clientsocket].nickname, chn.getName()));
+                sendError(clientsocket, RPL_TOPIC(clients_Map[clientsocket].nickname, chn.getName(), chn.gettopic()));
         }
     }
     //
