@@ -19,5 +19,11 @@
 #define ERR_CHANOPRIVSNEEDED(nickname, channelname) (": 482 " + nickname + " " + channelname + " :You're not channel operator" + CRLF)
 #define ERR_NOSUCHCHANNEL(nickname, channelname) (": 403 " + nickname + " " + channelname +  " :No such channel" + CRLF)
 #define RPL_CHANNELMODEIS(nickname, channelname, modestring) (": 324 " + nickname + " " + channelname +  " : " + modestring + CRLF)
-
+#define RPL_SENDMODEIS(nickname, channelname, modestring, sign , arg) ( nickname + " MODE " + channelname +  " : " + sign +  modestring + arg + CRLF)
+#define ERR_BADCHANNELKEY(nickname, channelname) ( ": 475 " +  nickname + " " + channelname + " :Cannot join channel (+k)" + CRLF )
+#define ERR_CHANNELISFULL(nickname, channelname) ( ": 471 " + nickname + " " + channelname +" :Cannot join channel (+l)" +  CRLF)
+#define ERR_INVITEONLYCHAN(nickname, channelname) ( ": 473 " + nickname + " " + channelname +" :Cannot join channel (+i)" +  CRLF)
+#define ERR_BADCHANMASK(channelname) ( ": 476 "  + channelname +" :Bad Channel Mask" +  CRLF)
+#define RPL_TOPIC(nickname, channelname, topic) ( ": 332 " + nickname + " " + channelname +" " + topic +  CRLF)
+#define RPL_JOIN(nickname, channelname ) ( nickname + " is joining the channel " + channelname  +  CRLF)
 #endif

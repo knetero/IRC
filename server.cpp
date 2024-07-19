@@ -385,27 +385,25 @@ Server::~Server(){
 
 /************************************************JOIN***************************************************************/
 
-int check_properties(Channel channel, std::string mdp, int clientsocket)
+int Server::check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client>& clients_Map)
 {
     if (channel.getmodes().find("k") != std::string::npos) {
-        std::cout << "The string contains '+k'" << std::endl;
-        std::cout << channel.getpassword() << "        "<< mdp<<std::endl;
-        if (channel.getpassword().compare(mdp) != 0)
+        if (channel.getpassword().compare(mdp) != 0 || mdp.empty())
         {
-            std::cout << "mdp incorrect" << std::endl;
+            sendError(clientsocket, ERR_BADCHANNELKEY(clients_Map[clientsocket].nickname, channel.getName()));
             return(1);
         }
     }
         if (channel.getmodes().find("l") != std::string::npos && channel.getSize() - channel.getlimit() <= 0)
         {
-            std::cout << "size incorrect" << std::endl;
+            sendError(clientsocket, ERR_CHANNELISFULL(clients_Map[clientsocket].nickname, channel.getName()));
             return(1);
         }
         if(channel.getmodes().find("i") != std::string::npos )
         {
             if (channel.getinvited().find(clientsocket) == channel.getinvited().end())
             {
-                std::cout << "client not invited" << std::endl;
+                sendError(clientsocket, ERR_INVITEONLYCHAN(clients_Map[clientsocket].nickname, channel.getName()));
                 return(1);
             }
         }
@@ -431,13 +429,12 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
         {
             if(ch[0] != '#')
             {
-                std::cout<<"problem on channel name "<<std::endl;
+                sendError(clientsocket, ERR_BADCHANMASK(ch));
                 while((getline(ss, ch, ',') && ch[0] != '#' ));
             }
             if(ch[0] == '#')
             {
                 map_channels[ch] = p; 
-                std::cout << ch <<" : "<< "|"<< p <<"|"<< std::endl;
             }
         }
     }
@@ -445,13 +442,12 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
         {
             if(ch[0] != '#')
             {
-                std::cout<<"problem on channel name "<<std::endl;
+                sendError(clientsocket, ERR_BADCHANMASK(ch));
                 while((getline(ss, ch, ',') && ch[0] != '#' ));
             }
             if(ch[0] == '#')
             {
                 map_channels[ch] = "-1"; 
-                // std::cout << ch <<" : "<< "|"<< p <<"|"<< std::endl;
             }
         }
     std::map<std::string, std::string>::iterator it;
@@ -459,21 +455,22 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
     for (it = map_channels.begin(); it != map_channels.end(); ++it) {
         std::map<std::string, Channel>::iterator element = server_channels.find(it->first.substr(1));
         if (element != server_channels.end()) {
-            std::cout << "Channel exists:  So add the user to that channel after cheking properties" << std::endl;
-            std::cout << "pass: " << it->second << std::endl;
-            if (check_properties( element->second,  map_channels[it->first], clientsocket) == 0)
+            if (check_properties( element->second,  map_channels[it->first], clientsocket, clients_Map) == 0)
             {
-                element->second.add_user(clients_Map[clientsocket], clientsocket, 0) ;
+                element->second.add_user(clients_Map[clientsocket], clientsocket, 0);
                 element->second.setSize(element->second.getSize()+1);
+                // if (element->second.getmodes().find("t") != std::string::npos)
+                sendError(clientsocket, RPL_JOIN(clients_Map[clientsocket].nickname, element->first));
+                sendError(clientsocket, RPL_TOPIC(clients_Map[clientsocket].nickname, element->first, element->second.gettopic()));
             }
             else
             {
-                 std::cout << "Error" << it->second << std::endl;
+                //  std::cout << "Error" << it->second << std::endl;
                 return;
             }
         }
         else {
-            std::cout << "Create this channel" << std::endl;
+            // std::cout << "Create this channel" << std::endl;
             //leaks here
             Channel chn = Channel();
             chn.setName(it->first.substr(1));
@@ -486,6 +483,8 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
             server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 1);
             server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 0);
             chn.setSize(chn.getSize()+1);
+            sendError(clientsocket, RPL_JOIN(clients_Map[clientsocket].nickname, element->first));
+            sendError(clientsocket, RPL_TOPIC(clients_Map[clientsocket].nickname, element->first, element->second.gettopic()));
         }
     }
     //
@@ -514,6 +513,23 @@ int Server::get_nick(std::string chName, std::string nickname)
             // std::cout << "no nickname" << std::endl;
             return (-1);
 }
+
+// void send_Mode( int clientsocket, std::map<int, Client>&  clients_Map, std::string chname, char mode, std::string sign , int witharg, std::string args)
+// {
+//             std::map<int, Client>::iterator itt;
+//             std::string arg = "";
+//             std::string str1(1, mode);;
+//             if (witharg != 0)
+//                 arg = args;
+//             for (itt = clients_Map.begin(); itt != clients_Map.end(); ++itt) {
+//                 if (clients_Map[clientsocket].clientSocket != clientsocket)
+//                 {
+//                     sendError(clientsocket ,RPL_SENDMODEIS(clients_Map[clientsocket].nickname, chname, str1, sign, arg));
+//                 }
+//             }
+// }
+
+
 void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  clients_Map)
 {
    (void)clientsocket;
@@ -578,7 +594,8 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
                                 ss = server_channels.find(args[0].substr(1))->second.getmodes();
                                 ss.erase(std::remove(ss.begin(), ss.end(), modes[i][j]), ss.end());
                                 server_channels.find(args[0].substr(1))->second.setmodes(ss);
-                                std::cout << ss << " |||||| " << std::endl;
+                                // std::string arg;
+                                // send_Mode( clientsocket,  clients_Map,args[0], modes[i][j],  "-" , 0,arg);
                             }
                         }
                         else if (server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first != clientsocket)
@@ -600,7 +617,7 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
                                     }
                                     else
                                         std::cout << " Error on limit number"<< std::endl;
-                                }
+                                } 
                                 else
                                     std::cout << " Error on number of args"<< std::endl;
 
@@ -653,3 +670,4 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
         std::cout << " after : |||||" << server_channels.find(args[0].substr(1))->second.getmodes() << "||||||" << std::endl;
     return;
 }
+
