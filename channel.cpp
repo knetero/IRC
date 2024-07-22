@@ -4,9 +4,24 @@
 #include <sstream>
 #include <map>
 
-Channel::Channel(){
-this->size = -1;
-this->limit = -1;
+
+// Channel::Channel(std::map<int, Client>* members,
+//                  std::map<int, Client>* operators,
+//                  std::map<int, Client>* invited_clients)
+//     : members(members), operators(operators), invited_clients(invited_clients) {
+//         this->size = -1;
+//     this->limit = -1;
+//     // Other initializations if needed
+// }
+
+
+
+Channel::Channel(void) {
+    this->size = -1;
+    this->limit = -1;
+    this->members = new std::map<int, Client>();
+    operators  = new std::map<int, Client>();
+    invited_clients  = new std::map<int, Client>();
 }
 std::string strTrim( std::string s1,  std::string set) {
     size_t start = 0;
@@ -174,44 +189,60 @@ std::string Channel::getpassword()
     return (password);
 }
 
-std::map<int, Client> Channel::getmembers()
+std::map<int, Client> *Channel::getmembers()
 {
     return (this->members);
 }
 
-std::map<int,  Client> Channel::getinvited()
+std::map<int,  Client> *Channel::getinvited()
 {
         return (invited_clients);
 }
 
-std::map<int, Client> Channel::getoperators()
+std::map<int, Client> *Channel::getoperators()
 {
     return (operators);
 }
 
 void Channel::add_user(Client c, int clientsocket, int type)
 {
-    if (type == 0 && members.find(clientsocket) == members.end())
+    if (type == 0 && members->find(clientsocket) == members->end())
     {
-            members.insert(std::pair<int, Client>(clientsocket,c));
+            members->insert(std::make_pair(clientsocket,c));
         std::map<int, Client>::iterator itt;
-            for (itt = members.begin(); itt != members.end(); ++itt) {
+            for (itt = members->begin(); itt != members->end(); ++itt) {
                 std::cout << itt->first << " client num" << std::endl;
             }
     }
-    else if(type == 1 && operators.find(clientsocket) == operators.end())
+    else if(type == 1 && operators->find(clientsocket) == operators->end())
     {
-        operators.insert(std::pair<int, Client>(clientsocket,c));
+        operators->insert(std::make_pair(clientsocket,c));
             std::map<int, Client>::iterator itt;
-            for (itt = operators.begin(); itt != operators.end(); ++itt) {
+            for (itt = operators->begin(); itt != operators->end(); ++itt) {
                 std::cout << itt->first << std::endl;
             }
     }
-    else if(type == -1 && invited_clients.find(clientsocket) == invited_clients.end())
+    else if(type == -1 && invited_clients->find(clientsocket) == invited_clients->end())
     {
-        invited_clients.insert(std::pair<int, Client>(clientsocket,c));
+        invited_clients->insert(std::make_pair(clientsocket,c));
     }
     
+}
+
+std::string Channel::getMemberNames()
+{
+    std::string memberNames;
+    std::string res;
+    for (std::map<int, Client>::const_iterator it = members->begin(); it != members->end(); ++it) {
+        std::string nickname = it->second.nickname;
+        if (operators->find(it->first) != operators->end()) {
+            memberNames += "@" + nickname + " ";
+        } else {
+            memberNames += nickname + " ";
+        }
+        res += memberNames;
+    }
+    return memberNames;
 }
 
 std::string UpperCaseStr(std::string s)

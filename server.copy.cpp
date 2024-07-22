@@ -482,7 +482,7 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
                 chn.setpassword(map_channels[it->first]);
                 chn.setmodes("k");
             }
-            server_channels.insert ( std::pair<std::string,Channel>(it->first.substr(1),chn));
+            server_channels.insert ( std::make_pair(it->first.substr(1),chn));
             server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 1);
             server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 0);
             chn.setSize(chn.getSize()+1);

@@ -26,4 +26,7 @@
 #define ERR_BADCHANMASK(channelname) ( ": 476 "  + channelname +" :Bad Channel Mask" +  CRLF)
 #define RPL_TOPIC(nickname, channelname, topic) ( ": 332 " + nickname + " " + channelname +" " + topic +  CRLF)
 #define RPL_JOIN(nickname, channelname ) ( nickname + " is joining the channel " + channelname  +  CRLF)
+#define ERR_NEEDMOREPARAMS(nickname, channelname ) ( ": 332 " + nickname + channelname + " :Not enough parameters" +  CRLF)
+#define RPL_NAMREPLY(nickname, channelname, names ) ( ": 353  :127.0.0.1 " + nickname + " = #" + channelname + " : " +names+ CRLF)
+#define RPL_ENDOFNAMES(nickname, channelname ) ( ": 366 :127.0.0.1 " + nickname + " #" + channelname + " :End of /NAMES list" + CRLF)
 #endif
