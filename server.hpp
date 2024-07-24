@@ -42,6 +42,7 @@ class Server {
         bool isSetNick;
         bool isSetPass;
         bool isSetUser;
+        bool isRegistred;
         static bool signal;
 
 
@@ -66,6 +67,13 @@ class Server {
         int get_nick(std::string chName, std::string nickname);
 
         int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client>& clients_Map);
+        //
+        void sendData(int fd, std::string data);
+        void passCommand(int fd, Client &client, std::string passwd);
+        void nickCommand(int fd, std::map<int, Client>& allClients, std::string param);
+        void privmsgCommand(int clientSocket, std::map<int, Client>& allClients, std::string params);
+        void broadcastToChannels(int fd, std::vector<Channel *> joinedChannels);
+
 };
 
 #endif

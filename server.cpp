@@ -263,85 +263,50 @@ void Server::check_Quit(int clientSocket, const std::string& data, std::map<int,
     //delete client from the channel
 }
 
-bool Server::check_Nick(int clientSocket, std::string value, std::map<int, Client>& clients_Map){
-    if (value.empty()) {
-        sendError(clientSocket, ERR_NONICKNAME(clients_Map[clientSocket].nickname));
-        return false;
-    }
-    if (value[0] == '#' || value[0] == ':' || (isdigit(value[0]))) {
-        sendError(clientSocket, ERR_ERRONEUSNICK(value));
-        return false;
-    }
-    return true;
-}
+// bool Server::check_Nick(int clientSocket, std::string value, std::map<int, Client>& clients_Map){
+//     if (value.empty()) {
+//         sendError(clientSocket, ERR_NONICKNAME(clients_Map[clientSocket].nickname));
+//         return false;
+//     }
+//     if (value[0] == '#' || value[0] == ':' || (isdigit(value[0]))) {
+//         sendError(clientSocket, ERR_ERRONEUSNICK(value));
+//         return false;
+//     }
+//     return true;
+// }
 
 
 
-void Server::parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map){
-
-    // Channel defaultChannel;
-    // Channel nameChannel("server_Channels");
-    if(isCommand(data) == false){
+void Server::parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map)
+{
+    if(isCommand(data) == false)
+    {
         isServerCommand = true;
         sendError(clientSocket, ERR_CMDNOTFOUND(clients_Map[clientSocket].nickname, data));
         return;
     }
     Client &client = clients_Map[clientSocket];
+    client.clientSocket = clientSocket;
+
     size_t spacePos = data.find(' ');
-    if (spacePos != std::string::npos) 
-    {
+    
         std::string command = data.substr(0, spacePos);
         std::string upcommand = toUpperCase(command);
-        std::string value = data.substr(spacePos + 1);
-
+        std::string value;
+        if (spacePos == std::string::npos)
+            value = "";
+        else
+            value = data.substr(spacePos + 1);
         value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
         value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
-        if(upcommand == "NICK") {
-            if(!check_Nick(clientSocket, value, clients_Map))
-                return;
-            for(std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
-                if(it->second.nickname == value) {
-                    sendError(clientSocket, ERR_NICKINUSE(clients_Map[clientSocket].nickname));
-                    return;
-                }
-            }
-            std::string oldNick = clients_Map[clientSocket].nickname;
-            clients_Map[clientSocket].nickname = value;
-            if(!oldNick.empty()) {
-                notifyClients(clientSocket, clients_Map, oldNick);
-            }
-            isServerCommand = true;
-            client.nickSet = true;
-        }
-        else if(upcommand == "USER") {
-            if(client.userSet) {
-                sendError(clientSocket, ERR_NOTREGISTERED(clients_Map[clientSocket].nickname));
-                return;
-            }
-            check_user(clientSocket, data, clients_Map, client);
-            isServerCommand = true;
-        }
-        else if (upcommand == "PASS")
-        {
-            if(client.passSet) {
-                sendError(clientSocket, ERR_ALREADYREGISTERED(clients_Map[clientSocket].nickname));
-                return;
-            }
-            isServerCommand = true;
-            if (value != password) {
-                sendError(clientSocket, ERR_INCORPASS(clients_Map[clientSocket].nickname));
-                return;
-            }
-            client.passSet = true;
-        }
+    
+        if (upcommand == "PASS")
+            passCommand(clientSocket, client, value);
+        else if (upcommand == "NICK")
+            nickCommand(clientSocket, clients_Map, value);
         else if(upcommand == "PRIVMSG")
         {
-            if(!client.passSet || !client.nickSet || !client.userSet){
-                sendError(clientSocket, ERR_NOTREGISTERED(clients_Map[clientSocket].nickname));
-                return;
-            }
-            isServerCommand = true;
-            send_private_message(clientSocket, value, clients_Map);
+            privmsgCommand(clientSocket, clients_Map, value);
         }
         else if(upcommand == "QUIT")
         {
@@ -363,11 +328,11 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
                 sendWelcomeMessages(clientSocket, clients_Map);
             client.welcome_msg++;
         }
-    }
-    else {
-        sendError(clientSocket, ERR_NOTENOUGHPARAM(clients_Map[clientSocket].nickname));
-        return;
-    }
+    
+    // else {
+    //     sendError(clientSocket, ERR_NOTENOUGHPARAM(clients_Map[clientSocket].nickname));
+    //     return;
+    // }
 }
 
 std::string Server::toUpperCase(std::string& str) {
@@ -419,9 +384,9 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
     std::string p;
     std::string ch;
     std::map<int, Client> members;
-std::map<int, Client> operators;
-std::map<int, Client> kicked_clients;
-std::map<int, Client> invited_clients;
+    std::map<int, Client> operators;
+    std::map<int, Client> kicked_clients;
+    std::map<int, Client> invited_clients;
     std::getline(iss, channels, ' ');
     std::stringstream ss(strTrim( channels , " ")); 
         password = value.substr( value.find(" ") + 1,value.size());
@@ -468,6 +433,7 @@ std::map<int, Client> invited_clients;
                 {
                     element->second.add_user(clients_Map[clientsocket], clientsocket, 0);
                     element->second.setSize(element->second.getSize()+1);
+                    clients_Map[clientsocket].joinedChannels.push_back(&(element->second));
                     msg = ":" + clients_Map[clientsocket].nickname + "!" + clients_Map[clientsocket].username + "@" + "127.0.0.1" + " JOIN " + "#" +element->second.getName();
                     sendMessage(clientsocket, msg);
                     // sendError(clientsocket, RPL_JOIN(clients_Map[clientsocket].nickname, element->second.getName()));
@@ -493,6 +459,7 @@ std::map<int, Client> invited_clients;
                 server_channels.insert (std::make_pair(it->first.substr(1),chn));
                 server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 1);
                 server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 0);
+                clients_Map[clientsocket].joinedChannels.push_back(&chn);
                 chn.setSize(chn.getSize()+1);
                 msg = ":" + clients_Map[clientsocket].nickname + "!" + clients_Map[clientsocket].username + "@" + "127.0.0.1" + " JOIN " + "#" +chn.getName();
                 sendMessage(clientsocket, msg);
@@ -502,17 +469,17 @@ std::map<int, Client> invited_clients;
                     sendError(clientsocket, RPL_TOPIC(clients_Map[clientsocket].nickname, chn.getName(), chn.gettopic()));
         }
     }
-     std::map<int, Client>::iterator itt;
-     for (itt = server_channels.find("chan")->second.getmembers()->begin(); itt != server_channels.find("chan")->second.getmembers()->end(); ++itt) {
-                std::cout << itt->first << "**"<< std::endl;
-        }
+    //  std::map<int, Client>::iterator itt;
+    //  for (itt = server_channels.find("chan")->second.getmembers()->begin(); itt != server_channels.find("chan")->second.getmembers()->end(); ++itt) {
+    //             std::cout << itt->first << "**"<< std::endl;
+    //     }
 }
 
 
 /************************************************MODE***************************************************************/
 int Server::get_nick(std::string chName, std::string nickname)
 {
-      std::map<int, Client>::iterator itt;
+      std::map<int, Client *>::iterator itt;
       (void)nickname;
       std::cout << "no nicknamvve" << std::endl;
             for (itt = server_channels.find(chName.substr(1))->second.getmembers()->begin(); itt != server_channels.find(chName.substr(1))->second.getmembers()->end(); ++itt) {
