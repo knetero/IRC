@@ -11,7 +11,7 @@
 #include <iostream>
 
 class Server;
-
+class Channel;
 class Client {
     public:
         std::map<int , Client> clients_Map;
@@ -35,6 +35,7 @@ class Client {
         int welcome_msg;
 
         int get_client_socket();
+        std::vector<Channel *> joinedChannels;
 };
 
 #endif
