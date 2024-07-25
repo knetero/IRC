@@ -50,22 +50,22 @@ class Server {
         int acceptClient();
         static void signalHandler(int signum);
         bool isCommand(const std::string& data);
-        void send_private_message(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
-        void parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
+        void send_private_message(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map);
+        void parse_commands(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map);
         bool sendError(int clientSocket, const std::string& errorMessage);
-        void notifyClients(int clientSocket, std::map<int, Client>& clients_Map, std::string oldNick);
+        void notifyClients(int clientSocket, std::map<int, Client >& clients_Map, std::string oldNick);
         std::string toUpperCase(std::string& str);
         std::vector<std::string> split(const std::string &s, char delim);
-        void check_Quit(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
-        void sendWelcomeMessages(int clientSocket, std::map<int, Client>& clients_Map);
-        void check_user(int clientSocket, const std::string&data , std::map<int, Client>& clients_Map, Client& client);
-        bool check_Nick(int clientSocket, std::string value,  std::map<int, Client>& clients_Map);
+        void check_Quit(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map);
+        void sendWelcomeMessages(int clientSocket, std::map<int, Client >& clients_Map);
+        void check_user(int clientSocket, const std::string&data , std::map<int, Client >& clients_Map, Client& client);
+        bool check_Nick(int clientSocket, std::string value,  std::map<int, Client >& clients_Map);
     
-        void join(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
-        void mod(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
+        void join(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
+        // void mod(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
         int get_nick(std::string chName, std::string nickname);
 
-        int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client>& clients_Map);
+        int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client >& clients_Map);
 };
 
 #endif

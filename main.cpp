@@ -100,4 +100,8 @@ int main(int ac , char** av)
     Client clients(server.socketId);
     // signal(SIGINT, server.signalHandler);
     run_server(server, clients);
+
+
+     
+        return(0);
 }

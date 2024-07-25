@@ -99,7 +99,7 @@ bool Server::initialize()
     }
     return true;
 }
-void Server::send_private_message(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map){
+void Server::send_private_message(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map){
     size_t spacePos = data.find(' ');
     if (spacePos != std::string::npos) {
         std::string target = data.substr(0, spacePos);
@@ -167,7 +167,7 @@ bool Server::isCommand(const std::string& data)
     return false;
 }
 
-void Server::notifyClients(int clientSocket, std::map<int, Client>& clients_Map, std::string oldNick){
+void Server::notifyClients(int clientSocket, std::map<int, Client >& clients_Map, std::string oldNick){
     std::string nickChangeMsg = RPL_NICKCHANGE(oldNick, clients_Map[clientSocket].nickname);
     for(std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
         if(it->first != clientSocket) {
@@ -188,7 +188,7 @@ std::vector<std::string> Server::split(const std::string &s, char delim) {
     return elems;
 }
 
-void Server::check_user(int clientSocket, const std::string&d , std::map<int, Client>& clients_Map, Client& client){
+void Server::check_user(int clientSocket, const std::string&d , std::map<int, Client >& clients_Map, Client& client){
     std::string data = d;
     toUpperCase(data);
     std::vector<std::string> parts = split(data, ' '); // split the string into parts
@@ -225,7 +225,7 @@ bool Server::sendMessage(int fd, const std::string& message) {
     return true;
 }
 
-void Server::sendWelcomeMessages(int clientSocket, std::map<int, Client>& clients_Map) {
+void Server::sendWelcomeMessages(int clientSocket, std::map<int, Client >& clients_Map) {
     std::string welcomeMsg = clients_Map[clientSocket].nickname + " :Welcome to the Server, " + 
                              clients_Map[clientSocket].nickname + "!<" + clients_Map[clientSocket].username + ">@127.0.0.1";
     sendMessage(clientSocket, welcomeMsg);
@@ -239,7 +239,7 @@ void Server::sendWelcomeMessages(int clientSocket, std::map<int, Client>& client
     sendMessage(clientSocket, createdMsg);
 }
 
-void Server::check_Quit(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map)
+void Server::check_Quit(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map)
 {
     std::string reason = "Quit";
     size_t reasonIndex = data.find(" ");
@@ -263,7 +263,7 @@ void Server::check_Quit(int clientSocket, const std::string& data, std::map<int,
     //delete client from the channel
 }
 
-bool Server::check_Nick(int clientSocket, std::string value, std::map<int, Client>& clients_Map){
+bool Server::check_Nick(int clientSocket, std::string value, std::map<int, Client >& clients_Map){
     if (value.empty()) {
         sendError(clientSocket, ERR_NONICKNAME(clients_Map[clientSocket].nickname));
         return false;
@@ -277,7 +277,7 @@ bool Server::check_Nick(int clientSocket, std::string value, std::map<int, Clien
 
 
 
-void Server::parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map){
+void Server::parse_commands(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map){
 
     // Channel defaultChannel;
     // Channel nameChannel("server_Channels");
@@ -411,7 +411,7 @@ int check_properties(Channel channel, std::string mdp, int clientsocket)
         }
     return (0);     
 }
-void Server::join(std::string value, int clientsocket, std::map<int, Client>& clients_Map)
+void Server::join(std::string value, int clientsocket, std::map<int, Client >& clients_Map)
 {
     // (void)clientsocket;
     std::istringstream iss(value);
@@ -499,10 +499,10 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
 /************************************************MODE***************************************************************/
 int Server::get_nick(std::string chName, std::string nickname)
 {
-      std::map<int, Client>::iterator itt;
+      std::map<int, Client >::iterator itt;
       (void)nickname;
       std::cout << "no nicknamvve" << std::endl;
-            for (itt = server_channels.find(chName.substr(1))->second.getmembers().begin(); itt != server_channels.find(chName.substr(1))->second.getmembers().end(); ++itt) {
+            for (itt = server_channels.find(chName.substr(1))->second.getmembers()->begin(); itt != server_channels.find(chName.substr(1))->second.getmembers()->end(); ++itt) {
                 std::cout << itt->first << std::endl;
 
                 // if (!itt->second.nickname.empty()  && itt->second.nickname  == nickname)
@@ -514,7 +514,7 @@ int Server::get_nick(std::string chName, std::string nickname)
             // std::cout << "no nickname" << std::endl;
             return (-1);
 }
-void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  clients_Map)
+void Server::mod(std::string value, int clientsocket, std::map<int, Client >&  clients_Map)
 {
    (void)clientsocket;
 //    (void)value;
@@ -533,12 +533,12 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
             // std::cout << "|"<< strTrim( channel , " ") << "|"<< std::endl;
         }
     } 
-            // std::map<int, Client>::iterator itt;
-            // // for (itt = server_channels.find(args[0].substr(1))->second.getoperators().begin(); itt != server_channels.find(args[0].substr(1))->second.getoperators().end(); ++itt) {
-            //     if (server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket)
+            // std::map<int, Client >::iterator itt;
+            // // for (itt = server_channels.find(args[0].substr(1))->second.getoperators()->begin(); itt != server_channels.find(args[0].substr(1))->second.getoperators()->end(); ++itt) {
+            //     if (server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first == clientsocket)
             //     {
             //         std::cout << "*** ***"<< clientsocket<< std::endl;
-            //         std::cout << "***** "<< server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first << std::endl;
+            //         std::cout << "***** "<< server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first << std::endl;
             //     }
             // }
         //   return ;
@@ -573,7 +573,7 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
                             sendError(clientsocket, ERR_NOSUCHCHANNEL(clients_Map[clientsocket].nickname, args[0]));
                         else if(server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) != std::string::npos && isalpha(modes[i][j]) )
                         {
-                            if (modes[i][0] == '-' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket)
+                            if (modes[i][0] == '-' && server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first == clientsocket)
                             {
                                 ss = server_channels.find(args[0].substr(1))->second.getmodes();
                                 ss.erase(std::remove(ss.begin(), ss.end(), modes[i][j]), ss.end());
@@ -585,7 +585,7 @@ void Server::mod(std::string value, int clientsocket, std::map<int, Client>&  cl
                         }
                         else if (args.size() <= 1 && server_channels.find(args[0].substr(1)) != server_channels.end())
                             sendError(clientsocket, RPL_CHANNELMODEIS(clients_Map[clientsocket].nickname, args[0], server_channels.find(args[0].substr(1))->second.getmodes()) );
-                        else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket && isalpha(modes[i][j])) 
+                        else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first == clientsocket && isalpha(modes[i][j])) 
                         {   
                             if (modes[i][j] == 'l')
                             {

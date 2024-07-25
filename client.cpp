@@ -16,6 +16,9 @@ Client::Client(int clientSocket){
 
 Client::Client(const Client& other){
     this->clientSocket = other.clientSocket;
+    this->nickname = other.nickname;
+    this->username = other.username;
+    this->realname = other.realname;
 }
 
 Client& Client::operator=(const Client& other){
