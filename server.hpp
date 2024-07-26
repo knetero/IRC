@@ -25,7 +25,7 @@ class Channel;
 class Server {
     public:
         Server(int port, const std::string& password);
-        std::map<std::string, Channel> server_channels;
+        std::map<std::string, Channel> *server_channels;
         // Server(const Server& other);
         // Server& operator=(const Server& other);
         ~Server();
@@ -64,8 +64,9 @@ class Server {
         void join(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
         void mod(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
         int get_nick(std::string chName, std::string nickname);
-
         int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client >& clients_Map);
+        void set_mode(std::vector<std::string> & args, char mode, std::map<int, Client >&  clients_Map, std::string ss);
+
 };
 
 #endif

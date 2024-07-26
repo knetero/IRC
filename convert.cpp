@@ -10,6 +10,7 @@ bool is_int(std::string param)
         if((param[index] = '-'))
             sign = -1;
         index++;
+            return (false);
     }
 
     while (index < param.length()) {

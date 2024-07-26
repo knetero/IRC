@@ -24,6 +24,7 @@ Server::Server(int port, const std::string& password){
     this->isSetNick  = false;
     this->isSetPass = false;
     this->isSetUser = false;
+    this->server_channels = new std::map<std::string, Channel >();
 
 }        
 bool Server::signal = false;
@@ -351,18 +352,21 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
         else if (upcommand == "JOIN")
         {
            join(value, clientSocket, clients_Map);
-        //       std::map<int, Client >::iterator itt;
+             
+        //         std::map<std::string, Channel >::iterator itt;
+        //         std::map<int, Client>::iterator it;
     
-        //    for (itt = server_channels.find("chan")->second.getmembers()->begin(); itt != server_channels.find("chan")->second.getmembers()->end();++itt) {
-        //                      std::cout << itt->second.nickname << " client nickname" << std::endl;
-        //                     std::cout << "hellllll" << std::endl;
+        //    for (itt = server_channels->begin(); itt != server_channels->end();++itt) {
+        //         std::cout << itt->second.getName() << " channel" << std::endl;
+        //              for (it = itt->second.getmembers()->begin(); it != itt->second.getmembers()->end();++it) {
+        //                      std::cout << it->second.nickname << " client " << std::endl;
         //                 }
-        }
-
-        // else if (upcommand == "MODE")
-        // {
-        //    mod(value, clientSocket,  clients_Map);
         // }
+        }
+        else if (upcommand == "MODE")
+        {
+           mod(value, clientSocket,  clients_Map);
+        }
         if(client.passSet && client.userSet && client.nickSet) {
             client.isRegistered = true;
             if(client.welcome_msg == 1)

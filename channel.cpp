@@ -1,5 +1,6 @@
 #include "channel.hpp"
 #include <string>
+
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -22,6 +23,8 @@ Channel::Channel(void) {
     this->members = new std::map<int, Client >();
     this->operators = new std::map<int, Client >();
     this->invited_clients = new std::map<int, Client >();
+    this->inviteonly = false;
+    this->otopic = false;
 }
 std::string strTrim( std::string s1,  std::string set) {
     size_t start = 0;
@@ -143,19 +146,42 @@ void Channel::add_user(Client * c, int clientsocket, int type)
     
 }
 
+// std::string Channel::getMemberNames()
+// {
+//     std::string memberNames = "";
+//     std::string res;
+//     for (std::map<int, Client >::const_iterator it = members->begin(); it != members->end(); ++it) {
+//         std::string nickname = it->second.nickname;
+//         if (operators->find(it->first) != operators->end()) {
+//             memberNames += "@" + nickname + " ";
+//             res.insert (0,  memberNames);
+//         } else {
+//             memberNames += nickname + " ";
+//             res.insert (res.length(),     memberNames);
+//         }
+//     }
+//     return res;
+// }
+
 std::string Channel::getMemberNames()
 {
     std::string memberNames;
-    std::string res;
-    for (std::map<int, Client >::const_iterator it = members->begin(); it != members->end(); ++it) {
-        std::string nickname = it->second.nickname;
+    
+    for (std::map<int, Client>::const_iterator it = members->begin(); it != members->end(); ++it) {
         if (operators->find(it->first) != operators->end()) {
-            memberNames += "@" + nickname + " ";
-        } else {
-            memberNames += nickname + " ";
+            memberNames += "@" + it->second.nickname + " ";
         }
-        res += memberNames;
     }
+
+    for (std::map<int, Client>::const_iterator it = members->begin(); it != members->end(); ++it) {
+        if (operators->find(it->first) == operators->end()) {
+            memberNames += it->second.nickname + " ";
+        }
+    }
+    if (!memberNames.empty() && memberNames.back() == ' ') {
+        memberNames.pop_back();
+    }
+
     return memberNames;
 }
 

@@ -26,6 +26,8 @@ class Channel {
 
         // Constructeur de la classe Channel
     public:
+        bool otopic;
+        bool inviteonly;
     // Channel(std::map<int, Client>* members,
     //              std::map<int, Client >* operators,
     //              std::map<int, Client >* kicked_clients,
