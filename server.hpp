@@ -62,7 +62,7 @@ class Server {
         bool check_Nick(int clientSocket, std::string value,  std::map<int, Client >& clients_Map);
     
         void join(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
-        // void mod(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
+        void mod(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
         int get_nick(std::string chName, std::string nickname);
 
         int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client >& clients_Map);
