@@ -288,61 +288,27 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
         return;
     }
     Client &client = clients_Map[clientSocket];
+    client.clientSocket = clientSocket;
+
     size_t spacePos = data.find(' ');
-    if (spacePos != std::string::npos) 
-    {
+    
         std::string command = data.substr(0, spacePos);
         std::string upcommand = toUpperCase(command);
-        std::string value = data.substr(spacePos + 1);
-
+        std::string value;
+        if (spacePos == std::string::npos)
+            value = "";
+        else
+            value = data.substr(spacePos + 1);
         value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
         value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
-        if(upcommand == "NICK") {
-            if(!check_Nick(clientSocket, value, clients_Map))
-                return;
-            for(std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
-                if(it->second.nickname == value) {
-                    sendError(clientSocket, ERR_NICKINUSE(clients_Map[clientSocket].nickname));
-                    return;
-                }
-            }
-            std::string oldNick = clients_Map[clientSocket].nickname;
-            clients_Map[clientSocket].nickname = value;
-            if(!oldNick.empty()) {
-                notifyClients(clientSocket, clients_Map, oldNick);
-            }
-            isServerCommand = true;
-            client.nickSet = true;
-        }
-        else if(upcommand == "USER") {
-            if(client.userSet) {
-                sendError(clientSocket, ERR_NOTREGISTERED(clients_Map[clientSocket].nickname));
-                return;
-            }
-            check_user(clientSocket, data, clients_Map, client);
-            isServerCommand = true;
-        }
-        else if (upcommand == "PASS")
-        {
-            if(client.passSet) {
-                sendError(clientSocket, ERR_ALREADYREGISTERED(clients_Map[clientSocket].nickname));
-                return;
-            }
-            isServerCommand = true;
-            if (value != password) {
-                sendError(clientSocket, ERR_INCORPASS(clients_Map[clientSocket].nickname));
-                return;
-            }
-            client.passSet = true;
-        }
+    
+        if (upcommand == "PASS")
+            passCommand(clientSocket, client, value);
+        else if (upcommand == "NICK")
+            nickCommand(clientSocket, clients_Map, value);
         else if(upcommand == "PRIVMSG")
         {
-            if(!client.passSet || !client.nickSet || !client.userSet){
-                sendError(clientSocket, ERR_NOTREGISTERED(clients_Map[clientSocket].nickname));
-                return;
-            }
-            isServerCommand = true;
-            send_private_message(clientSocket, value, clients_Map);
+            privmsgCommand(clientSocket, clients_Map, value);
         }
         else if(upcommand == "QUIT")
         {
@@ -373,11 +339,11 @@ void Server::parse_commands(int clientSocket, const std::string& data, std::map<
                 sendWelcomeMessages(clientSocket, clients_Map);
             client.welcome_msg++;
         }
-    }
-    else {
-        sendError(clientSocket, ERR_NOTENOUGHPARAM(clients_Map[clientSocket].nickname));
-        return;
-    }
+    
+    // else {
+    //     sendError(clientSocket, ERR_NOTENOUGHPARAM(clients_Map[clientSocket].nickname));
+    //     return;
+    // }
 }
 
 std::string Server::toUpperCase(std::string& str) {

@@ -42,6 +42,7 @@ class Server {
         bool isSetNick;
         bool isSetPass;
         bool isSetUser;
+        bool isRegistred;
         static bool signal;
 
 
