@@ -38,6 +38,7 @@ int Server::acceptClient()
     struct sockaddr_in clientAddress; // struct that holds the client address
     socklen_t clientAddressLength = sizeof(clientAddress); // size of the client address struct 
     int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength); // accept a connection on a socket
+    this->
     if (clientSocket == -1) {
         std::cerr << "Failed to accept client connection. errno: " << errno << std::endl;
         return -1;
@@ -482,7 +483,7 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client>& cl
                 chn.setpassword(map_channels[it->first]);
                 chn.setmodes("k");
             }
-            server_channels.insert ( std::pair<std::string,Channel>(it->first.substr(1),chn));
+            server_channels.insert ( std::make_pair(it->first.substr(1),chn));
             server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 1);
             server_channels[it->first.substr(1)].add_user(clients_Map[clientsocket], clientsocket, 0);
             chn.setSize(chn.getSize()+1);

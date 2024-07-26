@@ -11,10 +11,10 @@
 #include <iostream>
 
 class Server;
-
+class Channel;
 class Client {
     public:
-        std::map<int , Client> clients_Map;
+        std::map<int , Client > clients_Map;
         int clientSocket;
         std::map<int, std::string> clientBuffers;
         std::string nickname;
@@ -35,6 +35,7 @@ class Client {
         int welcome_msg;
 
         int get_client_socket();
+        std::vector<Channel > joinedChannels;
 };
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include <arpa/inet.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -25,7 +27,9 @@ class Channel;
 class Server {
     public:
         Server(int port, const std::string& password);
-        std::map<std::string, Channel> server_channels;
+        std::map<std::string, Channel > server_channels;
+        std::map<int, struct sockaddr_in> adresses;
+        struct sockaddr_in serverAddress;
         // Server(const Server& other);
         // Server& operator=(const Server& other);
         ~Server();
@@ -42,6 +46,7 @@ class Server {
         bool isSetNick;
         bool isSetPass;
         bool isSetUser;
+        bool isRegistred;
         static bool signal;
 
 
@@ -57,15 +62,28 @@ class Server {
         std::string toUpperCase(std::string& str);
         std::vector<std::string> split(const std::string &s, char delim);
         void check_Quit(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
-        void sendWelcomeMessages(int clientSocket, std::map<int, Client>& clients_Map);
+        // void sendWelcomeMessages(int clientSocket, std::map<int, Client>& clients_Map);
         void check_user(int clientSocket, const std::string&data , std::map<int, Client>& clients_Map, Client& client);
         bool check_Nick(int clientSocket, std::string value,  std::map<int, Client>& clients_Map);
     
-        void join(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
+        // void join(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
         void mod(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
         int get_nick(std::string chName, std::string nickname);
 
-        int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client>& clients_Map);
+        int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client >& clients_Map);
+        //
+        void sendData(int fd, std::string data);
+        void passCommand(int fd, Client &client, std::string passwd);
+        void nickCommand(int fd, std::map<int, Client>& allClients, std::string param);
+        void userCommand(int fd, std::map<int, Client>& allClients, std::string param);
+        void privmsgCommand(int clientSocket, std::map<int, Client>& allClients, std::string params);
+        void kickCommand(int fd, std::map<int, Client> &allClients, std::string params);
+        void broadcastToChannels(int fd, std::string nickname, Client &c);
+        void welcomeMessage(int fd, Client &client);
+        std::string getIp(struct sockaddr_in addr);
+
+        //
+        void join(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
 };
 
 #endif
