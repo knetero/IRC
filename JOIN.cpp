@@ -84,6 +84,7 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client >& c
                 if (element->second.getmembers()->find(clientsocket)->first != clientsocket)
                 {
                     member = new Client(clients_Map[clientsocket]);
+                    // member = &clients_Map[clientsocket];
                     clients_Map[clientsocket].joinedChannels.push_back(element->second);
                     element->second.add_user(member, clientsocket, 0);
                     element->second.setSize(element->second.getSize()+1);
@@ -111,6 +112,7 @@ void Server::join(std::string value, int clientsocket, std::map<int, Client >& c
             }
                 server_channels.insert (std::make_pair(it->first.substr(1),chn));
                 member = new Client(clients_Map[clientsocket]);
+                // member = &clients_Map[clientsocket];
                 clients_Map[clientsocket].joinedChannels.push_back(chn);
                 server_channels[it->first.substr(1)].add_user(member, clientsocket, 1);
                 server_channels[it->first.substr(1)].add_user(member, clientsocket, 0);

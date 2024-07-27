@@ -1,11 +1,11 @@
 #include "server.hpp"
 
-bool nickAlreadyInUse(std::string nickname, std::map<int, Client>& allClients, int fd)
+bool nickAlreadyInUse(std::string nickname, std::map<int, Client *>& allClients, int fd)
 {
-    std::map<int, Client>::iterator it;
+    std::map<int, Client *>::iterator it;
     for (it = allClients.begin(); it != allClients.end(); it++)
     {
-        if (it->second.nickname == nickname && it->second.get_client_socket() != fd)
+        if (it->second->nickname == nickname && it->second->get_client_socket() != fd)
             return (true);
     }
     return (false);
@@ -36,42 +36,42 @@ void Server::broadcastToChannels(int fd, std::string nickname, Client &c)
     }
 }
 
-void Server::nickCommand(int fd, std::map<int, Client>& allClients, std::string param)
+void Server::nickCommand(Client *client, std::vector<std::string> &parameters)
 {
-    if (!param.empty())
+    if (parameters.size())
     {
-        if (allClients[fd].passSet)
+        if (client->passSet)
         {
-            if (nickAlreadyInUse(param, allClients, fd)) // check if the username is already used.
-                sendData(fd, ERR_NICKINUSE(param));
-            else if (allClients[fd].nickname == param) // check if it is already my nickname
+            if (nickAlreadyInUse(parameters[0], serverClients, client->get_client_socket())) // check if the username is already used.
+                sendData(client->get_client_socket(), ERR_NICKINUSE(parameters[0]));
+            else if (client->nickname == parameters[0]) // check if it is already my nickname
                 return ;
-            else if (!isValidNick(param)) // check the synthax of the nickname
-                sendData(fd, ERR_ERRONEUSNICKNAME(param));
-            else if (allClients[fd].isRegistered) // check if already registred
+            else if (!isValidNick(parameters[0])) // check the synthax of the nickname
+                sendData(client->get_client_socket(), ERR_ERRONEUSNICKNAME(parameters[0]));
+            else if (client->isRegistered) // check if already registred
             {
-                if (allClients[fd].nickname != param) // client wants to change the nick
+                if (client->nickname != parameters[0]) // client wants to change the nick
                 {
-                    broadcastToChannels(fd, param, allClients[fd]);
-                    allClients[fd].nickname = param;
+                    broadcastToChannels(client->get_client_socket(), parameters[0], *client);
+                    client->nickname = parameters[0];
                 }
             }
             else
             {
-                allClients[fd].nickname = param;
-                allClients[fd].nickSet = true;
-                if (allClients[fd].nickSet && allClients[fd].userSet)
+                client->nickname = parameters[0];
+                client->nickSet = true;
+                if (client->nickSet && client->userSet)
                 {
-                    allClients[fd].isRegistered = true;
-                    welcomeMessage(fd, allClients[fd]);
+                    client->isRegistered = true;
+                    welcomeMessage(client->get_client_socket(), *client);
                 }
             }
         }
         else
         {
-            sendData(fd, ERROR(std::string("access denied: bad password")));
+            sendData(client->get_client_socket(), ERROR(std::string("access denied: bad password")));
         }
     }
     else
-        sendData(fd, ERR_NONICKNAMEGIVEN);
+        sendData(client->get_client_socket(), ERR_NONICKNAMEGIVEN);
 }

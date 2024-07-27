@@ -2,7 +2,7 @@
 #define SERVER_HPP
 
 #include <arpa/inet.h>
-
+#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -20,6 +20,13 @@
 #include "replies.hpp"
 #include "channel.hpp"
 
+#define RESET "\033[0m"
+#define RED "\033[31m"                /* Red */
+#define GREEN "\033[32m"              /* Green */
+#define YELLOW "\033[33m"             /* Yellow */
+#define BLUE "\033[34m"               /* Blue */
+#define MAGENTA "\033[35m"            /* Magenta */
+#define CYAN "\033[36m"               /* Cyan */
 
 #define BUFFER 1024
 class Client;
@@ -30,6 +37,7 @@ class Server {
         std::map<std::string, Channel > server_channels;
         std::map<int, struct sockaddr_in> adresses;
         struct sockaddr_in serverAddress;
+        std::map<int , Client *> serverClients;
         // Server(const Server& other);
         // Server& operator=(const Server& other);
         ~Server();
@@ -56,7 +64,7 @@ class Server {
         static void signalHandler(int signum);
         bool isCommand(const std::string& data);
         void send_private_message(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
-        void parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
+        void parse_commands(Client *client, const std::string& data);
         bool sendError(int clientSocket, const std::string& errorMessage);
         void notifyClients(int clientSocket, std::map<int, Client>& clients_Map, std::string oldNick);
         std::string toUpperCase(std::string& str);
@@ -73,14 +81,17 @@ class Server {
         int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client >& clients_Map);
         //
         void sendData(int fd, std::string data);
-        void passCommand(int fd, Client &client, std::string passwd);
-        void nickCommand(int fd, std::map<int, Client>& allClients, std::string param);
-        void userCommand(int fd, std::map<int, Client>& allClients, std::string param);
-        void privmsgCommand(int clientSocket, std::map<int, Client>& allClients, std::string params);
-        void kickCommand(int fd, std::map<int, Client> &allClients, std::string params);
+        void passCommand(Client *client, std::vector<std::string> &parameters);
+        void nickCommand(Client *client, std::vector<std::string> &parameters);
+        void userCommand(Client *client, std::vector<std::string> &parameters);
+        void privmsgCommand(Client *client, std::vector<std::string> &parameters);
+        void kickCommand(int fd, std::vector <std::string> &parameters);
         void broadcastToChannels(int fd, std::string nickname, Client &c);
         void welcomeMessage(int fd, Client &client);
         std::string getIp(struct sockaddr_in addr);
+        std::string getServerIp(void);
+        int getClientFd(std::string target);
+        void broadcastToChannel(Channel &channel, int operatorFd, std::string target, std::string comment);
 
         //
         void join(std::string value, int clientsocket, std::map<int, Client >& clients_Map);

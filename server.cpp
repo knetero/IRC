@@ -16,11 +16,13 @@ Server::Server(int port, const std::string& password){
     this->port = port;
 
     this->password = password;
-    if(!initialize()){
+    if(!initialize())
+    {
         std::cerr << "Failed to initialize the server" << std::endl;
         exit(1);
     }
-    std::cout << "Server is running on port " << port << std::endl;
+    std::cout << "Server IP: " << GREEN << getServerIp() << RESET << std::endl;
+    std::cout << "Server is listening on port: " << GREEN << port << RESET << std::endl;
     this->isServerCommand = false;
     this->isSetNick  = false;
     this->isSetPass = false;
@@ -45,7 +47,7 @@ int Server::acceptClient()
         return -1;
     }
     // if (signal) {
-    //     if (Server::signal) {
+    //     if (Server::signal) {    
     //         return -1;
     //     }
     // }
@@ -72,9 +74,10 @@ bool Server::initialize()
     }
     // declare the struct for the server address
     //struct sockaddr_in serverAddress; // struct that holds the server address
-    serverAddress.sin_family = AF_INET; // means we are using IPv4
-    serverAddress.sin_addr.s_addr = INADDR_ANY; // means we will accept connections from any IP address
-    serverAddress.sin_port = htons(port); // means we will accept connections on this port
+    struct sockaddr_in serverAddress1;
+    serverAddress1.sin_family = AF_INET; // means we are using IPv4
+    serverAddress1.sin_addr.s_addr = INADDR_ANY; // means we will accept connections from any IP address
+    serverAddress1.sin_port = htons(port); // means we will accept connections on this port
 
     //set the socket to reuse the address
     // SO_REUSEADDR means that the port can be reused immediately after the socket is closed
@@ -90,7 +93,7 @@ bool Server::initialize()
         exit(1);
     }
     // Bind the socket to the IP address and port
-    if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) { 
+    if (bind(serverSocket, (struct sockaddr*)&serverAddress1, sizeof(serverAddress1)) == -1) { 
         std::cerr << "Failed to bind to port " << port << ". errno: " << errno << std::endl;
         return false;
     }
@@ -115,6 +118,18 @@ std::string Server::getIp(struct sockaddr_in addr)
     return (inet_ntoa(addr.sin_addr));
 }
 
+std::string Server::getServerIp(void)
+{
+    char            hostname[256];
+    struct hostent  *host_entry;
+    char            *ipAdress;
+
+    gethostname(hostname, sizeof(hostname));
+    host_entry = gethostbyname(hostname);
+    ipAdress = inet_ntoa(*((struct in_addr *)host_entry->h_addr_list[0]));
+    return (ipAdress);
+}
+
 bool Server::isCommand(const std::string& data)
 {
     std::string command = data;
@@ -129,7 +144,7 @@ bool Server::isCommand(const std::string& data)
 
     if(command == "NICK" || command == "USER" || command == "PASS" || command == "PRIVMSG" || command == "INVITE" || command == "JOIN" 
         || command == "PART" || command == "MODE" || command == "TOPIC"|| command == "NAMES" || command == "LIST" 
-        || command == "KICK" || command == "QUIT" || command == "PING" || command == "MODE" || command == "TOPIC" || command == "NOTICE")
+        || command == "KICK" || command == "QUIT" || command == "PONG" || command == "MODE" || command == "TOPIC" || command == "NOTICE")
     {
         return true;
     }
@@ -148,8 +163,6 @@ std::vector<std::string> Server::split(const std::string &s, char delim) {
     return elems;
 }
 
-
-
 bool Server::sendMessage(int fd, const std::string& message) {
     std::string formattedMessage = message;
     if (formattedMessage.back() != '\n') { 
@@ -167,60 +180,89 @@ bool Server::sendMessage(int fd, const std::string& message) {
 
 void Server::welcomeMessage(int fd, Client &client)
 {
-    sendData(fd, RPL_WELCOME(client.nickname, client.username, getIp(this->serverAddress)));
+    sendData(fd, RPL_WELCOME(client.nickname, client.username, getIp(adresses[fd])));
 }
 
-void Server::parse_commands(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map)
+std::vector<std::string> splitParameters(std::string parametersString)
+{
+    std::vector<std::string>    parameters;
+    std::istringstream          ss(parametersString);
+    std::string                 parameter;
+    std::string                 tmp;
+    tmp = "";
+    while (std::getline(ss, parameter, ' '))
+    {
+        if (parameter[0] == ':')
+            tmp = parameter;
+        else if (!tmp.empty())
+        {
+            tmp += " ";
+            tmp += parameter;
+        }
+        else
+            parameters.push_back(parameter);
+    }
+    if (!tmp.empty())
+    {
+        tmp = tmp.substr(1);
+        parameters.push_back(tmp);
+    }
+    return (parameters);
+}
+
+int Server::getClientFd(std::string target)
+{
+    std::map<int, Client *>::iterator it;
+    for (it = this->serverClients.begin(); it != this->serverClients.end(); it++)
+    {
+        if (it->second->nickname == target)
+            return (it->first);
+    }
+    return (-1);
+}
+
+void Server::parse_commands(Client *client, const std::string& data)
 {
     if(isCommand(data) == false)
     {
         isServerCommand = true;
-        sendError(clientSocket, ERR_CMDNOTFOUND(clients_Map[clientSocket].nickname, data));
+        sendError(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, data));
         return;
     }
-    Client &client = clients_Map[clientSocket];
-    client.clientSocket = clientSocket;
 
     size_t spacePos = data.find(' ');
-    
-        std::string command = data.substr(0, spacePos);
-        std::string upcommand = toUpperCase(command);
-        std::string value;
-        if (spacePos == std::string::npos)
-            value = "";
-        else
-            value = data.substr(spacePos + 1);
-        // value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-        // value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
-        
-        if (upcommand == "PASS")
-            passCommand(clientSocket, client, value);
-        else if (upcommand == "NICK")
-            nickCommand(clientSocket, clients_Map, value);
-        else if (upcommand == "USER")
-            userCommand(clientSocket, clients_Map, value);
-        else if(upcommand == "PRIVMSG")
-        {
-            privmsgCommand(clientSocket, clients_Map, value);
-        }
-        // else if(upcommand == "QUIT")
-        // {
-        //     check_Quit(clientSocket, data, clients_Map);
-        //     isServerCommand = true;
-        // }
-        else if (upcommand == "JOIN")
-        {
-           join(value, clientSocket, clients_Map);
-            // join(value);
-        }
+    std::string command = data.substr(0, spacePos);
+    std::string upcommand = toUpperCase(command);
+    std::string value;
+    if (spacePos == std::string::npos)
+        value = "";
+    else
+        value = data.substr(spacePos + 1);
+    value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+    value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
+    std::vector<std::string> parameters = splitParameters(value);
+    ////
+    if (upcommand == "PASS")
+        passCommand(client, parameters);
+    else if (upcommand == "NICK")
+        nickCommand(client, parameters);
+    else if (upcommand == "USER")
+        userCommand(client, parameters);
+    else if(upcommand == "PRIVMSG")
+        privmsgCommand(client, parameters);
+    // else if (upcommand == "JOIN")
+    // {
+    //     join(value, clientSocket, clients_Map);
+    //         // join(value);
+    // }
         // else if (upcommand == "MODE")
         // {
         //    mod(value, clientSocket,  clients_Map);
         // }
-        else if (upcommand == "PING")
-            return ;
-        else if (upcommand == "KICK")
-            kickCommand(clientSocket, clients_Map, value);
+        // else if (upcommand == "PONG")
+        //     return ;
+        // else if (upcommand == "KICK")
+        //     kickCommand(clientSocket, parameters);
 }
 
 std::string Server::toUpperCase(std::string& str) {

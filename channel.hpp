@@ -51,6 +51,7 @@ class Channel {
         std::map<int, Client >  *getoperators();
         void add_user(Client * c , int clientsocket, int type); 
         std::string getMemberNames();
+        int clientExist(std::string name);
         Channel(void);
 
 };

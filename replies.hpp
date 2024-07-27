@@ -9,6 +9,8 @@
 
 #define PRIVMSG(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " PRIVMSG " + p4 + " :" + p5 + "\r\n"
 #define NICK(p1, p2, p3, p4) ":" + p1 + "!~" + p2 + "@" + p3 + " NICK :" + p4 + "\r\n"
+#define KICK(p1, p2, p3, p4, p5, p6) ":" + p1 + "!~" + p2 + "@" + p3 + " KICK " + p4 + " " + p5 + " :" + p6 + "\r\n"
+
 #define RPL_WELCOME(p1, p2, p3) ":1337.ma 001 " + p1 + " :Welcome to the Internet Relay Network " + p1 + "!~" + p2 + "@" + p3 + "\r\n"
 
 #define RPL_NICKCHANGE(oldnickname, nickname) (oldnickname + " changed his nickname to " + nickname + "."+ CRLF)
@@ -35,4 +37,8 @@
 #define ERR_NEEDMOREPARAMS(nickname, channelname ) ( ": 332 " + nickname + channelname + " :Not enough parameters" +  CRLF)
 #define RPL_NAMREPLY(nickname, channelname, names ) ( ": 353  :127.0.0.1 " + nickname + " = #" + channelname + " : " +names+ CRLF)
 #define RPL_ENDOFNAMES(nickname, channelname ) ( ": 366 :127.0.0.1 " + nickname + " #" + channelname + " :End of /NAMES list" + CRLF)
+#define ERR_USERNOTINCHANNEL(p1, p2, p3) ": 441 " + p1 + " " + p2 + " " + p3 + " :They aren't on that channel\r\n"
+#define ERR_CHANOPRIVSNEEDED2(p1, p2) ": 482 " + p1 + " " + p2 + " :Your privileges are too low\r\n"
+#define ERR_CANNOTSENDTOCHAN(p1, p2) " 404 " + p1 + " " + p2 + " :Cannot send to channel\r\n"
+
 #endif

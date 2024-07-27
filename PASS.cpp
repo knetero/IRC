@@ -1,18 +1,18 @@
 #include "server.hpp"
 
-void Server::passCommand(int fd, Client &client, std::string passwd)
+void Server::passCommand(Client *client, std::vector<std::string> &parameters)
 {
-    if (passwd.empty())
-        sendData(fd, ERR_NOTENOUGHPARAM(client.nickname));
-    else if (client.isRegistered)
-        sendData(fd, ERR_ALREADYREGISTERED(client.nickname));
+    if (parameters.size() == 0)
+        sendData(client->get_client_socket(), ERR_NOTENOUGHPARAM(client->nickname));
+    else if (client->isRegistered)
+        sendData(client->get_client_socket(), ERR_ALREADYREGISTERED(client->nickname));
     else
     {
-        if (passwd == this->password)
+        if (parameters[0] == this->password)
         {
-            client.passSet = true;
+            client->passSet = true;
         }
         else
-            sendData(fd, ERR_PASSWDMISMATCH(client.nickname));
+            sendData(client->get_client_socket(), ERR_PASSWDMISMATCH(client->nickname));
     }
 }

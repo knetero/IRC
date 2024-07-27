@@ -14,44 +14,39 @@ std::string getRealName(std::vector<std::string> params)
     return realName;
 }
 
-void Server::userCommand(int fd, std::map<int, Client>& allClients, std::string param)
+void Server::userCommand(Client *client, std::vector<std::string> &parameters)
 {
-    if (!param.empty())
+    if (parameters.size())
     {
-        if (allClients[fd].passSet)
+        if (client->passSet)
         {
-            if (allClients[fd].userSet)
+            if (client->userSet)
             {
-                sendData(fd, ERR_ALREADYREGISTERED(allClients[fd].nickname));
+                sendData(client->get_client_socket(), ERR_ALREADYREGISTERED(client->nickname));
                 return ;
             }
-            std::istringstream ss(param);
-            std::vector<std::string> params;
-            std::string p;
-            while (std::getline(ss, p, ' '))
-                params.push_back(p);
-            if (params.size() < 4)
+            if (parameters.size() < 4)
             {
-                sendData(fd, ERR_NOTENOUGHPARAM(allClients[fd].nickname));
+                sendData(client->get_client_socket(), ERR_NOTENOUGHPARAM(client->nickname));
                 return ;
             }
-            allClients[fd].username = params[0];
-            if (params[3][0] != ':')
-                allClients[fd].realname = params[3];
+            client->username = parameters[0];
+            if (parameters[3][0] != ':')
+                client->realname = parameters[3];
             else
-                allClients[fd].realname = getRealName(params);
-            allClients[fd].userSet = true;
-            if (allClients[fd].userSet && allClients[fd].nickSet)
+                client->realname = getRealName(parameters);
+            client->userSet = true;
+            if (client->userSet && client->nickSet)
             {
-                allClients[fd].isRegistered = true;
-                welcomeMessage(fd, allClients[fd]);
+                client->isRegistered = true;
+                welcomeMessage(client->get_client_socket(), *client);
             }
         }
         else
         {
-            sendData(fd, ERROR(std::string("access denied: bad password")));
+            sendData(client->get_client_socket(), ERROR(std::string("access denied: bad password")));
         }
     }
     else
-        sendData(fd, ERR_NOTENOUGHPARAM(std::string("test")));
+        sendData(client->get_client_socket(), ERR_NOTENOUGHPARAM(client->nickname));
 }

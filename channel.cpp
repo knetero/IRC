@@ -147,7 +147,6 @@ std::string Channel::getMemberNames()
 {
     std::string memberNames;
     std::string res;
-    std::cout << "members: "<< members->size() << std::endl;
     for (std::map<int, Client >::const_iterator it = members->begin(); it != members->end(); ++it) {
         std::string nickname = it->second.nickname;
         if (operators->find(it->first) != operators->end())
@@ -186,3 +185,13 @@ int valideName(std::string s)
     return (1);
 }
 
+int Channel::clientExist(std::string name)
+{
+    std::map<int, Client>::iterator it; 
+    for (it = getmembers()->begin(); it != getmembers()->end(); it++)
+    {
+        if (it->second.nickname == name)
+            return (1);
+    }
+    return (-1);
+}
