@@ -84,7 +84,7 @@ class Server {
         void passCommand(Client *client, std::vector<std::string> &parameters);
         void nickCommand(Client *client, std::vector<std::string> &parameters);
         void userCommand(Client *client, std::vector<std::string> &parameters);
-        // void privmsgCommand(Client *client, std::vector<std::string> &parameters);
+        void privmsgCommand(Client *client, std::vector<std::string> &parameters);
         void kickCommand(int fd, std::vector <std::string> &parameters);
         void broadcastToChannels(int fd, std::string nickname, Client &c);
         void welcomeMessage(int fd, Client &client);

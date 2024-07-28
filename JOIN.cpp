@@ -21,7 +21,7 @@
 //         }
 //         if(channel.getmodes().find("i") != std::string::npos )
 //         {
-//             if (channel.getinvited()->find(clientsocket) == channel.getinvited()->end())
+//             if (channel.getinvited().find(clientsocket) == channel.getinvited()->end())
 //             {
 //                 sendError(clientsocket, ERR_INVITEONLYCHAN(clients_Map[clientsocket].nickname, channel.getName()));
 //                 return(1);
@@ -328,7 +328,7 @@ int Server::check_properties(Channel channel, std::string mdp, Client *client)
         }
         if(channel.getmodes().find("i") != std::string::npos )
         {
-            if (channel.getinvited()->find(client->clientSocket) == channel.getinvited()->end())
+            if (channel.getinvited().find(client->clientSocket) == channel.getinvited().end())
             {
                 sendError(client->clientSocket, ERR_INVITEONLYCHAN(client->nickname, channel.getName()));
                 return(1);
@@ -392,7 +392,7 @@ void Server::join(std::string value, Client *client)
             {
                 if (element->second.getmembers().find(client->clientSocket)->first != client->clientSocket)
                 {
-                    if (element->second.inviteonly && element->second.getinvited()->find(client->clientSocket)->first != client->clientSocket)
+                    if (element->second.inviteonly && element->second.getinvited().find(client->clientSocket)->first != client->clientSocket)
                     {
                        sendError(client->clientSocket, ERR_INVITEONLYCHAN(serverClients[client->clientSocket]->nickname, element->second.getName()));
                        return;
@@ -451,13 +451,13 @@ void Server::join(std::string value, Client *client)
 /************************************************MODE***************************************************************/
 int Server::get_nick(std::string chName, std::string nickname)
 {
-      std::map<int, Client >::iterator itt;
+      std::map<int, Client *>::iterator itt;
     //   (void)nickname;
     //   std::cout << "no nicknamvve" << std::endl;
             for (itt = server_channels.find(chName.substr(1))->second.getmembers().begin(); itt != server_channels.find(chName.substr(1))->second.getmembers().end(); ++itt) {
                 std::cout << itt->first << std::endl;
 
-                if (!itt->second.nickname.empty()  && itt->second.nickname  == nickname)
+                if (!itt->second->nickname.empty()  && itt->second->nickname  == nickname)
                 {
                     return (itt->first);
                 }
@@ -468,7 +468,7 @@ int Server::get_nick(std::string chName, std::string nickname)
 
 void Server::send_info(Channel chName, std::string msg)
 {
-      std::map<int, Client >::iterator itt;
+      std::map<int, Client *>::iterator itt;
 
             for (itt = chName.getmembers().begin(); itt != chName.getmembers().end(); ++itt) {
 

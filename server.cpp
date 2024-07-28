@@ -242,15 +242,15 @@ void Server::parse_commands(Client *client, const std::string& data)
     value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
     std::vector<std::string> parameters = splitParameters(value);
     ////
-    if (upcommand == "PASS")
-        passCommand(client, parameters);
-    else if (upcommand == "NICK")
-        nickCommand(client, parameters);
-    else if (upcommand == "USER")
-        userCommand(client, parameters);
+    // if (upcommand == "PASS")
+    //     passCommand(client, parameters);
+    // else if (upcommand == "NICK")
+    //     nickCommand(client, parameters);
+    // else if (upcommand == "USER")
+    //     userCommand(client, parameters);
     // else if(upcommand == "PRIVMSG")
     //     privmsgCommand(client, parameters);
-    else if (upcommand == "JOIN")
+    if (upcommand == "JOIN")
     {
         join(value, client);
             // join(value);
