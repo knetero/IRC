@@ -65,10 +65,10 @@ void Server::kickCommand(int fd, std::vector <std::string> &parameters)
         {
             if (this->server_channels[parameters[0].substr(1)].clientExist(users[i]) != -1) // check if the user is in the channel
             {
-                if (server_channels[parameters[0].substr(1)].getoperators()->find(fd) != server_channels[parameters[0].substr(1)].getoperators()->end()) // check if operator
+                if (server_channels[parameters[0].substr(1)].getoperators().find(fd) != server_channels[parameters[0].substr(1)].getoperators().end()) // check if operator
                 {
                     broadcastToChannel(server_channels[parameters[0].substr(1)], fd, users[i], parameters[2]);
-                    server_channels[parameters[0].substr(1)].getmembers()->erase(server_channels[parameters[0].substr(1)].getmembers()->find(getClientFd(users[i]))); // remove user from members of channel
+                    server_channels[parameters[0].substr(1)].getmembers().erase(server_channels[parameters[0].substr(1)].getmembers().find(getClientFd(users[i]))); // remove user from members of channel
                 }
                 else
                     sendData(fd, ERR_CHANOPRIVSNEEDED2(this->serverClients[fd]->nickname, parameters[0]));

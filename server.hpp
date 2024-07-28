@@ -75,16 +75,16 @@ class Server {
         bool check_Nick(int clientSocket, std::string value,  std::map<int, Client>& clients_Map);
     
         // void join(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
-        void mod(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
+        // void mod(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
         int get_nick(std::string chName, std::string nickname);
 
-        int check_properties(Channel channel, std::string mdp, int clientsocket, std::map<int, Client >& clients_Map);
+        int check_properties(Channel channel, std::string mdp, Client *client);
         //
         void sendData(int fd, std::string data);
         void passCommand(Client *client, std::vector<std::string> &parameters);
         void nickCommand(Client *client, std::vector<std::string> &parameters);
         void userCommand(Client *client, std::vector<std::string> &parameters);
-        void privmsgCommand(Client *client, std::vector<std::string> &parameters);
+        // void privmsgCommand(Client *client, std::vector<std::string> &parameters);
         void kickCommand(int fd, std::vector <std::string> &parameters);
         void broadcastToChannels(int fd, std::string nickname, Client &c);
         void welcomeMessage(int fd, Client &client);
@@ -94,7 +94,11 @@ class Server {
         void broadcastToChannel(Channel &channel, int operatorFd, std::string target, std::string comment);
 
         //
-        void join(std::string value, int clientsocket, std::map<int, Client >& clients_Map);
+        void join(std::string value, Client *client);
+        // void set_mode(std::vector<std::string> & args, char mode, std::map<int, Client >&  clients_Map, std::string ss);
+        void mod(std::string value, Client * client);
+        void send_info(Channel chName, std::string msg);
+        // int get_nick(std::string chName, std::string nickname);
 };
 
 #endif

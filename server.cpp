@@ -248,17 +248,17 @@ void Server::parse_commands(Client *client, const std::string& data)
         nickCommand(client, parameters);
     else if (upcommand == "USER")
         userCommand(client, parameters);
-    else if(upcommand == "PRIVMSG")
-        privmsgCommand(client, parameters);
-    // else if (upcommand == "JOIN")
-    // {
-    //     join(value, clientSocket, clients_Map);
-    //         // join(value);
-    // }
-        // else if (upcommand == "MODE")
-        // {
-        //    mod(value, clientSocket,  clients_Map);
-        // }
+    // else if(upcommand == "PRIVMSG")
+    //     privmsgCommand(client, parameters);
+    else if (upcommand == "JOIN")
+    {
+        join(value, client);
+            // join(value);
+    }
+        else if (upcommand == "MODE")
+        {
+           mod(value, client);
+        }
         // else if (upcommand == "PONG")
         //     return ;
         // else if (upcommand == "KICK")
@@ -360,7 +360,7 @@ Server::~Server(){
 //         if (element != server_channels.end()) {
 //             if (check_properties( element->second,  map_channels[it->first], clientsocket, clients_Map) == 0)
 //             {
-//                 if (element->second->getmembers()->find(clientsocket)->first != clientsocket)
+//                 if (element->second->getmembers().find(clientsocket)->first != clientsocket)
 //                 {
 //                     element->second->add_user(clients_Map[clientsocket], clientsocket, 0);
 //                     element->second->setSize(element->second->getSize()+1);
@@ -405,7 +405,7 @@ Server::~Server(){
 //         }
 //     }
 //     //  std::map<int, Client>::iterator itt;
-//     //  for (itt = server_channels.find("chan")->second.getmembers()->begin(); itt != server_channels.find("chan")->second.getmembers()->end(); ++itt) {
+//     //  for (itt = server_channels.find("chan")->second.getmembers().begin(); itt != server_channels.find("chan")->second.getmembers().end(); ++itt) {
 //     //             std::cout << itt->first << "**"<< std::endl;
 //     //     }
 // }
@@ -417,7 +417,7 @@ Server::~Server(){
 //       std::map<int, Client *>::iterator itt;
 //       (void)nickname;
 //       std::cout << "no nicknamvve" << std::endl;
-//             for (itt = server_channels.find(chName.substr(1))->second.getmembers()->begin(); itt != server_channels.find(chName.substr(1))->second.getmembers()->end(); ++itt) {
+//             for (itt = server_channels.find(chName.substr(1))->second.getmembers().begin(); itt != server_channels.find(chName.substr(1))->second.getmembers().end(); ++itt) {
 //                 std::cout << itt->first << std::endl;
 
 //                 // if (!itt->second.nickname.empty()  && itt->second.nickname  == nickname)
@@ -470,7 +470,7 @@ Server::~Server(){
 //     } 
 //         std::cout << " fffff : ||||| " << args.size() << "***"  << std::endl;
 //             // std::map<int, Client>::iterator itt;
-//             // // for (itt = server_channels.find(args[0].substr(1))->second.getoperators()->begin(); itt != server_channels.find(args[0].substr(1))->second.getoperators()->end(); ++itt) {
+//             // // for (itt = server_channels.find(args[0].substr(1))->second.getoperators().begin(); itt != server_channels.find(args[0].substr(1))->second.getoperators().end(); ++itt) {
 //             //     if (server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket)
 //             //     {
 //             //         std::cout << "*** ***"<< clientsocket<< std::endl;
@@ -508,7 +508,7 @@ Server::~Server(){
 //                             sendError(clientsocket, ERR_NOSUCHCHANNEL(clients_Map[clientsocket].nickname, args[0]));
 //                         else if(server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) != std::string::npos && isalpha(modes[i][j]) )
 //                         {
-//                             if (modes[i][0] == '-' && server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first == clientsocket)
+//                             if (modes[i][0] == '-' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket)
 //                             {
 //                                 ss = server_channels.find(args[0].substr(1))->second.getmodes();
 //                                 ss.erase(std::remove(ss.begin(), ss.end(), modes[i][j]), ss.end());
@@ -517,9 +517,9 @@ Server::~Server(){
 //                                 // send_Mode( clientsocket,  clients_Map,args[0], modes[i][j],  "-" , 0,arg);
 //                             }
 //                         }
-//                         else if (server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first != clientsocket)
+//                         else if (server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first != clientsocket)
 //                                 sendError(clientsocket, ERR_CHANOPRIVSNEEDED(clients_Map[clientsocket].nickname, args[0]) );
-//                         else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first == clientsocket && isalpha(modes[i][j])) 
+//                         else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket && isalpha(modes[i][j])) 
 //                         {   
 //                             if (modes[i][j] == 'l')
 //                             {

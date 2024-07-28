@@ -19,17 +19,15 @@ class Channel {
         std::string password;
         int size;
         int limit;
-        std::map<int, Client >  *members;
-        std::map<int, Client > * operators;
-        std::map<int, Client >  * invited_clients;
+        std::map<int, Client *>  members;
+        std::map<int, Client *> operators;
+        std::map<int, Client *>  invited_clients;
 
 
         // Constructeur de la classe Channel
     public:
-    // Channel(std::map<int, Client>* members,
-    //              std::map<int, Client >* operators,
-    //              std::map<int, Client >* kicked_clients,
-    //              std::map<int, Client >* invited_clients);
+        bool otopic;
+        bool inviteonly;
         void setName(std::string name);  
         void settype(std::string type);  
         void setmodes(std::string modes);  
@@ -46,9 +44,9 @@ class Channel {
         std::string gettopic();  
         std::string getpassword();
 
-        std::map<int, Client >  *getmembers();
-        std::map<int, Client >  *getinvited();
-        std::map<int, Client >  *getoperators();
+        std::map<int, Client *>  getmembers();
+        std::map<int, Client *>  getinvited();
+        std::map<int, Client *>  getoperators();
         void add_user(Client * c , int clientsocket, int type); 
         std::string getMemberNames();
         int clientExist(std::string name);

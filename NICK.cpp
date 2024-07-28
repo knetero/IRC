@@ -28,7 +28,7 @@ void Server::broadcastToChannels(int fd, std::string nickname, Client &c)
     for (size_t i = 0; i < c.joinedChannels.size(); i++)
     {
         std::map<int, Client >::iterator it;
-        for (it = c.joinedChannels[i].getmembers()->begin(); it != c.joinedChannels[i].getmembers()->end(); it++)
+        for (it = c.joinedChannels[i].getmembers().begin(); it != c.joinedChannels[i].getmembers().end(); it++)
         {
             sendData(it->second.get_client_socket(),\
             NICK(c.nickname, c.username, getIp(adresses[fd]), nickname));
