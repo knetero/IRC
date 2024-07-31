@@ -3,12 +3,12 @@
 bool is_int(std::string param)
 {
     int result = 0;
-    int sign = 1;
+    // int sign ;
     size_t index = 0;
 
     if (index < param.length() && (param[index] == '-' || param[index] == '+')) {
-        if((param[index] = '-'))
-            sign = -1;
+        // if((param[index] = '-'))
+        //     sign = -1;
         index++;
     }
 

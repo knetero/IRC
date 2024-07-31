@@ -1,22 +1,8 @@
 #include "server.hpp"
 
-std::string getRealName(std::vector<std::string> params)
-{
-    std::string realName;
-    for (size_t i = 3; i < params.size(); i++)
-    {
-        realName += params.at(i);
-        if (i + 1 == params.size())
-            break ;
-        realName += " ";
-    }
-    realName = realName.substr(1);
-    return realName;
-}
-
 void Server::userCommand(Client *client, std::vector<std::string> &parameters)
 {
-    if (parameters.size())
+    if (parameters.size() > 1)
     {
         if (client->passSet)
         {
@@ -25,21 +11,18 @@ void Server::userCommand(Client *client, std::vector<std::string> &parameters)
                 sendData(client->get_client_socket(), ERR_ALREADYREGISTERED(client->nickname));
                 return ;
             }
-            if (parameters.size() < 4)
+            if (parameters.size() < 5)
             {
                 sendData(client->get_client_socket(), ERR_NOTENOUGHPARAM(client->nickname));
                 return ;
             }
-            client->username = parameters[0];
-            if (parameters[3][0] != ':')
-                client->realname = parameters[3];
-            else
-                client->realname = getRealName(parameters);
+            client->username = parameters[1];
+            client->realname = parameters[4];
             client->userSet = true;
             if (client->userSet && client->nickSet)
             {
                 client->isRegistered = true;
-                welcomeMessage(client->get_client_socket(), *client);
+                welcomeMessage(client->get_client_socket(), client);
             }
         }
         else

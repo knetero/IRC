@@ -38,12 +38,14 @@ void Server::signalHandler(int signum){
 
 int Server::acceptClient() 
 {
+
     struct sockaddr_in clientAddress; // struct that holds the client address
     socklen_t clientAddressLength = sizeof(clientAddress); // size of the client address struct 
     int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength); // accept a connection on a socket
-    this->adresses.insert(std::make_pair(clientSocket, clientAddress));
+    this->clientAdress = clientAddress;
+
     if (clientSocket == -1) {
-        std::cerr << "Failed to accept client connection. errno: " << errno << std::endl;
+        std::cerr << "Failed to accept client connection. errno: " << std::endl;
         return -1;
     }
     // if (signal) {
@@ -54,11 +56,11 @@ int Server::acceptClient()
 
     // Set the socket to non-blocking mode
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
-        std::cerr << "Failed to set client socket to non-blocking mode." << errno << std::endl;
+        std::cerr << "Failed to set client socket to non-blocking mode." << std::endl;
         close(clientSocket);
     }
 
-    std::cout << "Client connected FD: " << clientSocket << std::endl;
+    std::cout << GREEN << "[+] Client connected, client fd: " << RESET << clientSocket << std::endl;
     return clientSocket;
 }
 
@@ -69,7 +71,7 @@ bool Server::initialize()
     // SOCK_STREAM means we are using a TCP connection
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
-        std::cerr << "Failed to create a socket. errno: " << errno << std::endl;
+        std::cerr << "Failed to create a socket. errno: " << std::endl;
         return false;
     }
     // declare the struct for the server address
@@ -94,187 +96,56 @@ bool Server::initialize()
     }
     // Bind the socket to the IP address and port
     if (bind(serverSocket, (struct sockaddr*)&serverAddress1, sizeof(serverAddress1)) == -1) { 
-        std::cerr << "Failed to bind to port " << port << ". errno: " << errno << std::endl;
+        std::cerr << "Failed to bind to port " << port << ". errno: " << std::endl;
         return false;
     }
     // Mark the socket for listening in
     if (listen(serverSocket, 5) == -1) { // 5 is the maximum length to which the queue of pending connections for serverSocket may grow
-        std::cerr << "Failed to listen on socket. errno: " << errno << std::endl;
+        std::cerr << "Failed to listen on socket. errno: " << std::endl;
         return false;
     }
+    this->startdate = new char[100];
+    getDate(&startdate);
     return true;
 }
 
-bool Server::sendError(int clientSocket, const std::string& errorMessage){ //
-     if (!sendMessage(clientSocket, errorMessage)) { //
-        std::cerr << "Error sending message: " << errorMessage << std::endl;
-        return false;
-    }
-    return true;
-}
-
-std::string Server::getIp(struct sockaddr_in addr)
+void Server::parse_commands(Client *client, std::string& data)
 {
-    return (inet_ntoa(addr.sin_addr));
-}
-
-std::string Server::getServerIp(void)
-{
-    char            hostname[256];
-    struct hostent  *host_entry;
-    char            *ipAdress;
-
-    gethostname(hostname, sizeof(hostname));
-    host_entry = gethostbyname(hostname);
-    ipAdress = inet_ntoa(*((struct in_addr *)host_entry->h_addr_list[0]));
-    return (ipAdress);
-}
-
-bool Server::isCommand(const std::string& data)
-{
-    std::string command = data;
-
-    if(command.find(" ") != std::string::npos)
-        command = command.substr(0, command.find(" "));
-    command.erase(0, command.find_first_not_of(" \n\r\t\f\v")); // remove leading whitespace
-    command.erase(command.find_last_not_of(" \n\r\t\f\v") + 1);
-
-
-    command = toUpperCase(command);
-
-    if(command == "NICK" || command == "USER" || command == "PASS" || command == "PRIVMSG" || command == "INVITE" || command == "JOIN" 
-        || command == "PART" || command == "MODE" || command == "TOPIC"|| command == "NAMES" || command == "LIST" 
-        || command == "KICK" || command == "QUIT" || command == "PONG" || command == "MODE" || command == "TOPIC" || command == "NOTICE")
-    {
-        return true;
-    }
-    return false;
-}
-
-std::vector<std::string> Server::split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) { // getline reads characters from the input stream and places them into a string until the delimeter is found
-        if (!item.empty()) {
-            elems.push_back(item); 
-        }
-    }
-    return elems;
-}
-
-bool Server::sendMessage(int fd, const std::string& message) {
-    std::string formattedMessage = message;
-    if (formattedMessage.back() != '\n') { 
-        formattedMessage += "\r\n";
-    }
-
-    ssize_t bytesSent = send(fd, formattedMessage.c_str(), formattedMessage.length(), 0);
-    
-    if (bytesSent == -1) {
-        std::cerr << "Failed to send message: " << std::strerror(errno) << std::endl;
-        return false;
-    }
-    return true;
-}
-
-void Server::welcomeMessage(int fd, Client &client)
-{
-    sendData(fd, RPL_WELCOME(client.nickname, client.username, getIp(adresses[fd])));
-}
-
-std::vector<std::string> splitParameters(std::string parametersString)
-{
-    std::vector<std::string>    parameters;
-    std::istringstream          ss(parametersString);
-    std::string                 parameter;
-    std::string                 tmp;
-    tmp = "";
-    while (std::getline(ss, parameter, ' '))
-    {
-        if (parameter[0] == ':')
-            tmp = parameter;
-        else if (!tmp.empty())
-        {
-            tmp += " ";
-            tmp += parameter;
-        }
-        else
-            parameters.push_back(parameter);
-    }
-    if (!tmp.empty())
-    {
-        tmp = tmp.substr(1);
-        parameters.push_back(tmp);
-    }
-    return (parameters);
-}
-
-int Server::getClientFd(std::string target)
-{
-    std::map<int, Client *>::iterator it;
-    for (it = this->serverClients.begin(); it != this->serverClients.end(); it++)
-    {
-        if (it->second->nickname == target)
-            return (it->first);
-    }
-    return (-1);
-}
-
-void Server::parse_commands(Client *client, const std::string& data)
-{
-    if(isCommand(data) == false)
-    {
-        isServerCommand = true;
-        sendError(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, data));
-        return;
-    }
-
-    size_t spacePos = data.find(' ');
-    std::string command = data.substr(0, spacePos);
-    std::string upcommand = toUpperCase(command);
-    std::string value;
-    if (spacePos == std::string::npos)
-        value = "";
-    else
-        value = data.substr(spacePos + 1);
-    value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
-    value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
-    std::vector<std::string> parameters = splitParameters(value);
+    data.erase(std::remove(data.begin(), data.end(), '\r'), data.end());
+    data.erase(std::remove(data.begin(), data.end(), '\n'), data.end());
+    std::vector<std::string> parameters = splitParameters(data);
+    if (parameters.size() == 0)
+        return ;
+    parameters[0] = toUpperCase(parameters[0]);
     ////
-    // if (upcommand == "PASS")
-    //     passCommand(client, parameters);
-    // else if (upcommand == "NICK")
-    //     nickCommand(client, parameters);
-    // else if (upcommand == "USER")
-    //     userCommand(client, parameters);
-    // else if(upcommand == "PRIVMSG")
-    //     privmsgCommand(client, parameters);
-    if (upcommand == "JOIN")
-    {
-        join(value, client);
-            // join(value);
-    }
-        else if (upcommand == "MODE")
-        {
-           mod(value, client);
-        }
+    if (parameters[0] == "PASS")
+        passCommand(client, parameters);
+    else if (parameters[0] == "NICK")
+        nickCommand(client, parameters);
+    else if (parameters[0] == "USER")
+        userCommand(client, parameters);
+    else if(parameters[0] == "PRIVMSG")
+        privmsgCommand(client, parameters);
+    else if (parameters[0] == "INVITE")
+        inviteCommand(client, parameters);
+    else if (parameters[0] == "KICK")
+        kickCommand(client, parameters);
+    else if (parameters[0] == "TOPIC")
+        topicCommand(client, parameters);
+    else if (parameters[0] == "JOIN")
+        join(data, client);
+        // else if (upcommand == "MODE")
+        // {
+        //    mod(value, clientSocket,  clients_Map);
+        // }
         // else if (upcommand == "PONG")
         //     return ;
-        // else if (upcommand == "KICK")
-        //     kickCommand(clientSocket, parameters);
+    else
+        sendData(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, data));
 }
 
-std::string Server::toUpperCase(std::string& str) {
-    for (size_t i = 0; i < str.length(); ++i) {
-        str[i] = std::toupper(static_cast<unsigned char>(str[i]));
-    }
-    return str;
-}
-
-
-
-Server::~Server(){
+Server::~Server()
+{
     // shutdown();
 }
 
@@ -360,7 +231,7 @@ Server::~Server(){
 //         if (element != server_channels.end()) {
 //             if (check_properties( element->second,  map_channels[it->first], clientsocket, clients_Map) == 0)
 //             {
-//                 if (element->second->getmembers().find(clientsocket)->first != clientsocket)
+//                 if (element->second->getmembers()->find(clientsocket)->first != clientsocket)
 //                 {
 //                     element->second->add_user(clients_Map[clientsocket], clientsocket, 0);
 //                     element->second->setSize(element->second->getSize()+1);
@@ -405,7 +276,7 @@ Server::~Server(){
 //         }
 //     }
 //     //  std::map<int, Client>::iterator itt;
-//     //  for (itt = server_channels.find("chan")->second.getmembers().begin(); itt != server_channels.find("chan")->second.getmembers().end(); ++itt) {
+//     //  for (itt = server_channels.find("chan")->second.getmembers()->begin(); itt != server_channels.find("chan")->second.getmembers()->end(); ++itt) {
 //     //             std::cout << itt->first << "**"<< std::endl;
 //     //     }
 // }
@@ -417,7 +288,7 @@ Server::~Server(){
 //       std::map<int, Client *>::iterator itt;
 //       (void)nickname;
 //       std::cout << "no nicknamvve" << std::endl;
-//             for (itt = server_channels.find(chName.substr(1))->second.getmembers().begin(); itt != server_channels.find(chName.substr(1))->second.getmembers().end(); ++itt) {
+//             for (itt = server_channels.find(chName.substr(1))->second.getmembers()->begin(); itt != server_channels.find(chName.substr(1))->second.getmembers()->end(); ++itt) {
 //                 std::cout << itt->first << std::endl;
 
 //                 // if (!itt->second.nickname.empty()  && itt->second.nickname  == nickname)
@@ -470,7 +341,7 @@ Server::~Server(){
 //     } 
 //         std::cout << " fffff : ||||| " << args.size() << "***"  << std::endl;
 //             // std::map<int, Client>::iterator itt;
-//             // // for (itt = server_channels.find(args[0].substr(1))->second.getoperators().begin(); itt != server_channels.find(args[0].substr(1))->second.getoperators().end(); ++itt) {
+//             // // for (itt = server_channels.find(args[0].substr(1))->second.getoperators()->begin(); itt != server_channels.find(args[0].substr(1))->second.getoperators()->end(); ++itt) {
 //             //     if (server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket)
 //             //     {
 //             //         std::cout << "*** ***"<< clientsocket<< std::endl;
@@ -508,7 +379,7 @@ Server::~Server(){
 //                             sendError(clientsocket, ERR_NOSUCHCHANNEL(clients_Map[clientsocket].nickname, args[0]));
 //                         else if(server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) != std::string::npos && isalpha(modes[i][j]) )
 //                         {
-//                             if (modes[i][0] == '-' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket)
+//                             if (modes[i][0] == '-' && server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first == clientsocket)
 //                             {
 //                                 ss = server_channels.find(args[0].substr(1))->second.getmodes();
 //                                 ss.erase(std::remove(ss.begin(), ss.end(), modes[i][j]), ss.end());
@@ -517,9 +388,9 @@ Server::~Server(){
 //                                 // send_Mode( clientsocket,  clients_Map,args[0], modes[i][j],  "-" , 0,arg);
 //                             }
 //                         }
-//                         else if (server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first != clientsocket)
+//                         else if (server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first != clientsocket)
 //                                 sendError(clientsocket, ERR_CHANOPRIVSNEEDED(clients_Map[clientsocket].nickname, args[0]) );
-//                         else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators().find(clientsocket)->first == clientsocket && isalpha(modes[i][j])) 
+//                         else if (server_channels.find(args[0].substr(1)) != server_channels.end() && server_channels.find(args[0].substr(1))->second.getmodes().find(modes[i][j]) == std::string::npos && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second.getoperators()->find(clientsocket)->first == clientsocket && isalpha(modes[i][j])) 
 //                         {   
 //                             if (modes[i][j] == 'l')
 //                             {

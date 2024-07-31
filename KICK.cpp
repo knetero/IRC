@@ -11,72 +11,68 @@ std::vector<std::string> split_(std::string string, char delimiter)
     return splitted;
 }
 
-int channelExist(std::map<std::string, Channel> &channels, std::string channelName)
-{
-    if (channelName[0] == '#')
-        channelName = channelName.substr(1);
-    else
-        return -1;
-    if (channels.find(channelName) != channels.end())
-    {
-        return 1;
-    }
-    return -1;
-}
 
-void Server::broadcastToChannel(Channel &channel, int operatorFd, std::string target, std::string comment)
+
+void Server::broadcastToChannel(Channel &channel, Client *kicker, std::string target, std::string comment)
 {
-    std::map<int, Client> *channelMembers = channel.getmembers();
-    std::map<int, Client>::iterator it;
-    for (it = channelMembers->begin(); it != channelMembers->end(); it++)
+    std::map<int, Client *> channelMembers = channel.getmembers();
+    std::map<int, Client *>::iterator it;
+    for (it = channelMembers.begin(); it != channelMembers.end(); it++)
     {
-        int memberFd = it->first;
-        Client *member = serverClients[memberFd];
-        sendData(memberFd, KICK(member->nickname, member->username, getIp(adresses[operatorFd]), channel.getName(), target, comment));
+        Client *member = serverClients[it->first];
+        sendData(member->get_client_socket(), KICK(kicker->nickname, kicker->username, getIp(kicker->clientAdress), channel.getName(), target, comment));
     }
 }
 
-void Server::kickCommand(int fd, std::vector <std::string> &parameters)
+void Server::kickCommand(Client *client, std::vector <std::string> &parameters)
 {
-    if (this->serverClients[fd]->isRegistered)
+    if (client->isRegistered)
     {
-        if (parameters.size() < 3)
+        if (parameters.size() < 4)
         {
-            sendData(fd, ERR_NOTENOUGHPARAM(this->serverClients[fd]->nickname));
+            sendData(client->clientSocket, ERR_NOTENOUGHPARAM(client->nickname));
             return ;
         }
-        else if (parameters.size() > 3 && parameters[3][0] != ':')
+        else if (parameters.size() > 4 && parameters[3][0] != ':')
         {
-            sendData(fd, ERR_NOTENOUGHPARAM(this->serverClients[fd]->nickname));
+            sendData(client->clientSocket, ERR_NOTENOUGHPARAM(client->nickname));
             return ;
         }
         std::string comment = "";
-        if (parameters.size() == 3)
-            comment = parameters[2];
+        if (parameters.size() == 4)
+            comment = parameters[3];
         // store users 
-        std::vector<std::string> users = split_(parameters[1], ',');
+        std::vector<std::string> users = split_(parameters[2], ',');
         // check the channel exist;
-        if (channelExist(this->server_channels, parameters[0]) == -1)
+        if (channelExist(parameters[1]) == -1)
         {
-            sendData(fd, ERR_NOSUCHCHANNEL(this->serverClients[fd]->nickname, parameters[0]));
+            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[1]));
             return ;
         }
+        
         for (size_t i = 0; i < users.size(); i++)
         {
-            if (this->server_channels[parameters[0].substr(1)].clientExist(users[i]) != -1) // check if the user is in the channel
+            Channel *channel = this->server_channels[parameters[1].substr(1)];
+            if (channel->clientExist(client->nickname) != -1)
             {
-                if (server_channels[parameters[0].substr(1)].getoperators().find(fd) != server_channels[parameters[0].substr(1)].getoperators().end()) // check if operator
+                if (channel->clientExist(users[i]) != -1) // check if the user is in the channel
                 {
-                    broadcastToChannel(server_channels[parameters[0].substr(1)], fd, users[i], parameters[2]);
-                    server_channels[parameters[0].substr(1)].getmembers().erase(server_channels[parameters[0].substr(1)].getmembers().find(getClientFd(users[i]))); // remove user from members of channel
+                    if (channel->getoperators().find(client->clientSocket)->first == client->clientSocket ) // check if operator
+                    {
+                        Client *clientToKick = channel->getmembers()[getClientFd(users[i])];
+                        broadcastToChannel(*channel, client, users[i], parameters[3]);
+                        channel->removeUser(clientToKick); // remove user from members, operators and invited of channel
+                    }
+                    else
+                        sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED2(client->nickname, parameters[1]));
                 }
                 else
-                    sendData(fd, ERR_CHANOPRIVSNEEDED2(this->serverClients[fd]->nickname, parameters[0]));
+                    sendData(client->clientSocket, ERR_USERNOTINCHANNEL(client->nickname, parameters[2], parameters[1]));
             }
             else
-                sendData(fd, ERR_USERNOTINCHANNEL(this->serverClients[fd]->nickname, parameters[1], parameters[0]));
+                sendData(client->clientSocket, ERR_NOTONCHANNEL(client->nickname, parameters[1]));
         }
     }
     else
-        sendData(fd, ERR_NOTREGISTERED(this->serverClients[fd]->nickname));
+        sendData(client->clientSocket, ERR_NOTREGISTERED(client->nickname));
 }

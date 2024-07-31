@@ -16,13 +16,17 @@
 
 
 
-Channel::Channel(void) {
+Channel::Channel(void)
+{
     this->size = -1;
     this->limit = -1;
+    this->hasTopic = false;
+    this->protectedTopic = false;
     // this->members = new std::map<int, Client >();
     // this->operators = new std::map<int, Client >();
     // this->invited_clients = new std::map<int, Client >();
 }
+
 std::string strTrim( std::string s1,  std::string set) {
     size_t start = 0;
     size_t end = s1.length();
@@ -101,7 +105,7 @@ std::string Channel::getmodes()
     return (modes);
 }
 
-std::string Channel::gettopic()
+std::string &Channel::gettopic()
 {
     return (topic);
 }
@@ -111,17 +115,17 @@ std::string Channel::getpassword()
     return (password);
 }
 
-std::map<int, Client * >  Channel::getmembers()
+std::map<int, Client * >  &Channel::getmembers()
 {
     return (this->members);
 }
 
-std::map<int,  Client  *>   Channel::getinvited()
+std::map<int,  Client  *>   &Channel::getinvited()
 {
-        return (invited_clients);
+    return (invited_clients);
 }
 
-std::map<int, Client * >  Channel::getoperators()
+std::map<int, Client * >  &Channel::getoperators()
 {
     return (operators);
 }
@@ -158,8 +162,9 @@ std::string Channel::getMemberNames()
             memberNames += it->second->nickname + " ";
         }
     }
-    if (!memberNames.empty() && memberNames.back() == ' ') {
-        memberNames.pop_back();
+    if (!memberNames.empty() && memberNames[memberNames.size() - 1] == ' ')
+    {
+        memberNames = memberNames.substr(0, memberNames.size() - 1);
     }
 
     return memberNames;
@@ -189,13 +194,43 @@ int valideName(std::string s)
     return (1);
 }
 
+////
+
 int Channel::clientExist(std::string name)
 {
-    std::map<int, Client *>::iterator it; 
+    std::map<int, Client *>::iterator it;
     for (it = getmembers().begin(); it != getmembers().end(); it++)
     {
         if (it->second->nickname == name)
             return (1);
     }
     return (-1);
+}
+
+int Channel::removeUser(Client *client)
+{
+    std::map<int, Client *>::iterator it;
+    for (it = this->getmembers().begin(); it != this->getmembers().end(); it++)
+    {
+        if (it->second == client)
+        {
+            this->getmembers().erase(it);
+        }
+    }
+
+    std::map<int, Client *>::iterator it1;
+    for (it1 = this->getoperators().begin(); it1 != this->getoperators().begin(); it1++)
+    {
+        if (it1->second == client)
+            this->getoperators().erase(it1);
+    }
+
+    std::map<int, Client *>::iterator it2;
+    for (it2 = this->getinvited().begin(); it2 != this->getinvited().end(); it2++)
+    {
+        if (it2->second == client)
+            this->getinvited().erase(it2);
+    }
+
+    return (0);
 }

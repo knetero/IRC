@@ -28,10 +28,11 @@ void AcceptNewClient(Server& server)
         clientSocket.events = POLLIN;
         server.clientSockets.push_back(clientSocket);
         // clients.clients_Map[server.socketId] = clients;
+
         // create a new client object, and push it to the map;
         Client *client = new Client(server.socketId);
-        // client.clientSocket = server.socketId;
         server.serverClients.insert(std::make_pair(server.socketId, client));
+        server.serverClients[server.socketId]->clientAdress = server.clientAdress;
     }
 }
 
@@ -40,17 +41,18 @@ void ReceiveData(Server& server, size_t i)
     int bytesRead = recv(server.clientSockets[i].fd, server.buffer, sizeof(server.buffer), 0);
     if(bytesRead == -1)
     {
-        std::cerr << "Failed to read from client" << std::endl;
+        std::cerr << "Failed to read from client" << server.clientSockets[i].fd << std::endl;
         return;
     }
     if(bytesRead == 0)
     {
-        std::cout << "Client " << server.clientSockets[i].fd << " exited from the Server" << std::endl;
+        std::cout << RED << "[-] Client disconnected, client fd: " << RESET << server.clientSockets[i].fd << std::endl;
+        server.serverClients.erase(server.serverClients.find(server.clientSockets[i].fd));
         close(server.clientSockets[i].fd);
         // server.clientSockets.erase(server.clientSockets.begin() + i);
-        // clients.clients_Map.erase(server.clientSockets[i].fd);
         return;
     }
+    // std::cout << "actual server clients" << server.serverClients.size() << std::endl;
     Client *client = server.serverClients[server.clientSockets[i].fd];
     client->buffer.append(server.buffer, bytesRead);
     // clients.clientBuffers[server.clientSockets[i].fd].append(server.buffer, bytesRead);
@@ -63,7 +65,6 @@ void ReceiveData(Server& server, size_t i)
         // clients.clientBuffers[server.clientSockets[i].fd].erase(0, newlinepos + 2);
     }
 }
-
 
 void run_server(Server& server)
 {

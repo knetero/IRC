@@ -26,7 +26,8 @@ class Channel {
 
         // Constructeur de la classe Channel
     public:
-        bool otopic;
+        bool hasTopic;
+        bool protectedTopic;
         bool inviteonly;
         void setName(std::string name);  
         void settype(std::string type);  
@@ -41,16 +42,18 @@ class Channel {
         int getlimit();  
         std::string gettype();  
         std::string getmodes();  
-        std::string gettopic();  
+        std::string &gettopic();  
         std::string getpassword();
 
-        std::map<int, Client *>  getmembers();
-        std::map<int, Client *>  getinvited();
-        std::map<int, Client *>  getoperators();
+        std::map<int, Client *>  &getmembers();
+        std::map<int, Client *>  &getinvited();
+        std::map<int, Client *>  &getoperators();
         void add_user(Client * c , int clientsocket, int type); 
+        int removeUser(Client *);
         std::string getMemberNames();
         int clientExist(std::string name);
         Channel(void);
+        ~Channel(){std::cout << "channel destructor" << std::endl;}
 
 };
 std::string UpperCaseStr(std::string s);

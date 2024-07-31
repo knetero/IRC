@@ -2,16 +2,21 @@
 #include "server.hpp"
 #include <cstddef>
 
-Client::Client(){
+Client::Client()
+{
     this->passSet = false;
     this->nickSet = false;
     this->userSet = false;
     this->isRegistered = false;
-    this->welcome_msg = 1;
 }
 
-Client::Client(int clientSocket){
+Client::Client(int clientSocket)
+{
     this->clientSocket = clientSocket;
+    this->passSet = false;
+    this->nickSet = false;
+    this->userSet = false;
+    this->isRegistered = false;
 }
 
 Client::Client(const Client& other){

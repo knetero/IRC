@@ -1,6 +1,10 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include <string>
+#include <algorithm>
+#include <cstdio>
+#include <errno.h>  
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/types.h>
@@ -34,10 +38,11 @@ class Channel;
 class Server {
     public:
         Server(int port, const std::string& password);
-        std::map<std::string, Channel > server_channels;
-        std::map<int, struct sockaddr_in> adresses;
         struct sockaddr_in serverAddress;
-        std::map<int , Client *> serverClients;
+        struct sockaddr_in clientAdress;
+        std::map<int , Client *>            serverClients;
+        std::map<std::string, Channel *>    server_channels;
+        char    *startdate;
         // Server(const Server& other);
         // Server& operator=(const Server& other);
         ~Server();
@@ -59,46 +64,43 @@ class Server {
 
 
         bool initialize();
-        bool sendMessage(int fd, const std::string& message);
         int acceptClient();
         static void signalHandler(int signum);
-        bool isCommand(const std::string& data);
         void send_private_message(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
-        void parse_commands(Client *client, const std::string& data);
-        bool sendError(int clientSocket, const std::string& errorMessage);
+        void parse_commands(Client *client, std::string& data);
         void notifyClients(int clientSocket, std::map<int, Client>& clients_Map, std::string oldNick);
         std::string toUpperCase(std::string& str);
-        std::vector<std::string> split(const std::string &s, char delim);
         void check_Quit(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
-        // void sendWelcomeMessages(int clientSocket, std::map<int, Client>& clients_Map);
         void check_user(int clientSocket, const std::string&data , std::map<int, Client>& clients_Map, Client& client);
         bool check_Nick(int clientSocket, std::string value,  std::map<int, Client>& clients_Map);
     
-        // void join(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
-        // void mod(std::string value, int clientsocket, std::map<int, Client>& clients_Map);
-        int get_nick(std::string chName, std::string nickname);
+        void                        welcomeMessage(int fd, Client *client);
+        int                         get_nick(std::string chName, std::string nickname);
+        int                         check_properties(Channel &channel, std::string mdp, Client *client);
+        void                        sendData(int fd, std::string data);
+        void                        broadcastToChannels(std::string nickname, Client *c);
+        std::string                 getIp(struct sockaddr_in addr);
+        std::string                 getServerIp(void);
+        int                         getClientFd(std::string target);
+        void                        broadcastToChannel(Channel &channel, Client *kicker, std::string target, std::string comment);
+        void                        getDate(char **buf);
+        std::vector<std::string>    splitParameters(std::string parametersString);
+        void send_info(Channel &chName, std::string msg);
+        int channelExist(std::string channelName);
+        void broadcastTopic(Channel *channel, Client *client, std::string topic);
 
-        int check_properties(Channel channel, std::string mdp, Client *client);
-        //
-        void sendData(int fd, std::string data);
-        void passCommand(Client *client, std::vector<std::string> &parameters);
-        void nickCommand(Client *client, std::vector<std::string> &parameters);
-        void userCommand(Client *client, std::vector<std::string> &parameters);
-        void privmsgCommand(Client *client, std::vector<std::string> &parameters);
-        void kickCommand(int fd, std::vector <std::string> &parameters);
-        void broadcastToChannels(int fd, std::string nickname, Client &c);
-        void welcomeMessage(int fd, Client &client);
-        std::string getIp(struct sockaddr_in addr);
-        std::string getServerIp(void);
-        int getClientFd(std::string target);
-        void broadcastToChannel(Channel &channel, int operatorFd, std::string target, std::string comment);
 
+        // Commands
+        void                        passCommand(Client *client, std::vector<std::string> &parameters);
+        void                        nickCommand(Client *client, std::vector<std::string> &parameters);
+        void                        userCommand(Client *client, std::vector<std::string> &parameters);
+        void                        privmsgCommand(Client *client, std::vector<std::string> &parameters);
+        void                        kickCommand(Client *client, std::vector <std::string> &parameters);
+        void                        inviteCommand(Client *client, std::vector<std::string> &parameters);
+        void                        topicCommand(Client *client, std::vector<std::string> &parameters);
+        void                        join(std::string value, Client *client);
+        void                        mod(std::string value, Client * client);
         //
-        void join(std::string value, Client *client);
-        // void set_mode(std::vector<std::string> & args, char mode, std::map<int, Client >&  clients_Map, std::string ss);
-        void mod(std::string value, Client * client);
-        void send_info(Channel chName, std::string msg);
-        // int get_nick(std::string chName, std::string nickname);
 };
 
 #endif

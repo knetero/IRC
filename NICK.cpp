@@ -13,57 +13,54 @@ bool nickAlreadyInUse(std::string nickname, std::map<int, Client *>& allClients,
 
 bool isValidNick(std::string nickname)
 {
-    if (nickname[0] == '#' || nickname[0] == ':')
+    if (nickname.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}/|-_") != std::string::npos)
         return (false);
-    // if (isdigit(nickname[0]))
-    //     return (false);
-    // if (nickname.find(" "))
-    //     return (false);
+    if (!isalpha(nickname[0]))
+        return (false);
     return true;
 }
 
-void Server::broadcastToChannels(int fd, std::string nickname, Client &c)
+void Server::broadcastToChannels(std::string nickname, Client *c)
 {
-    std::cout << c.joinedChannels.size() << std::endl;
-    for (size_t i = 0; i < c.joinedChannels.size(); i++)
+    for (size_t i = 0; i < c->joinedChannels.size(); i++)
     {
-        std::map<int, Client >::iterator it;
-        for (it = c.joinedChannels[i].getmembers().begin(); it != c.joinedChannels[i].getmembers().end(); it++)
+        std::map<int, Client *>::iterator it;
+        for (it = c->joinedChannels[i].getmembers().begin(); it != c->joinedChannels[i].getmembers().end(); it++)
         {
-            sendData(it->second.get_client_socket(),\
-            NICK(c.nickname, c.username, getIp(adresses[fd]), nickname));
+            sendData(it->second->get_client_socket(),\
+            NICK(c->nickname, c->username, getIp(c->clientAdress), nickname));
         }
     }
 }
 
 void Server::nickCommand(Client *client, std::vector<std::string> &parameters)
 {
-    if (parameters.size())
+    if (parameters.size() == 2)
     {
         if (client->passSet)
         {
-            if (nickAlreadyInUse(parameters[0], serverClients, client->get_client_socket())) // check if the username is already used.
-                sendData(client->get_client_socket(), ERR_NICKINUSE(parameters[0]));
-            else if (client->nickname == parameters[0]) // check if it is already my nickname
+            if (nickAlreadyInUse(parameters[1], serverClients, client->get_client_socket())) // check if the username is already used.
+                sendData(client->get_client_socket(), ERR_NICKINUSE(parameters[1]));
+            else if (client->nickname == parameters[1]) // check if it is already my nickname
                 return ;
-            else if (!isValidNick(parameters[0])) // check the synthax of the nickname
-                sendData(client->get_client_socket(), ERR_ERRONEUSNICKNAME(parameters[0]));
+            else if (!isValidNick(parameters[1])) // check the synthax of the nickname
+                sendData(client->get_client_socket(), ERR_ERRONEUSNICKNAME(parameters[1]));
             else if (client->isRegistered) // check if already registred
             {
-                if (client->nickname != parameters[0]) // client wants to change the nick
+                if (client->nickname != parameters[1]) // client wants to change the nick
                 {
-                    broadcastToChannels(client->get_client_socket(), parameters[0], *client);
-                    client->nickname = parameters[0];
+                    broadcastToChannels(parameters[1], client);
+                    client->nickname = parameters[1];
                 }
             }
             else
             {
-                client->nickname = parameters[0];
+                client->nickname = parameters[1];
                 client->nickSet = true;
                 if (client->nickSet && client->userSet)
                 {
                     client->isRegistered = true;
-                    welcomeMessage(client->get_client_socket(), *client);
+                    welcomeMessage(client->get_client_socket(), client);
                 }
             }
         }
