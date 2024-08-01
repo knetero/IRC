@@ -1,6 +1,5 @@
 #include "server.hpp"
 
-
 void Server::broadcastTopic(Channel *channel, Client *client, std::string topic)
 {
     std::map<int, Client *>::iterator it;

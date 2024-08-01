@@ -349,8 +349,8 @@ void Server::join(std::string value, Client *client)
     std::string ch;
     std::getline(iss, channels, ' ');
     std::stringstream ss(strTrim( channels , " ")); 
-        password = value.substr( value.find(" ") + 1,value.size());
-        std::stringstream pa(strTrim( password , " "));
+    password = value.substr( value.find(" ") + 1,value.size());
+    std::stringstream pa(strTrim( password , " "));
     
     if (strTrim(value, " ").empty())
         sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "JOIN"));

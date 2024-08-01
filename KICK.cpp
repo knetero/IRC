@@ -11,8 +11,6 @@ std::vector<std::string> split_(std::string string, char delimiter)
     return splitted;
 }
 
-
-
 void Server::broadcastToChannel(Channel &channel, Client *kicker, std::string target, std::string comment)
 {
     std::map<int, Client *> channelMembers = channel.getmembers();
@@ -49,7 +47,6 @@ void Server::kickCommand(Client *client, std::vector <std::string> &parameters)
             sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[1]));
             return ;
         }
-        
         for (size_t i = 0; i < users.size(); i++)
         {
             Channel *channel = this->server_channels[parameters[1].substr(1)];

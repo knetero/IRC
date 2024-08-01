@@ -19,7 +19,7 @@
 
 #define RPL_NICKCHANGE(oldnickname, nickname) (oldnickname + " changed his nickname to " + nickname + "."+ CRLF)
 #define ERR_NOTENOUGHPARAM(nickname) (": 461 " + nickname + " :Not enough parameters." + CRLF)
-#define ERR_NOSUCHNICK(channelname, name) (": 401 #" + channelname + " " + name + " :No such nick/channel" + CRLF )
+#define ERR_NOSUCHNICK(client, name) (": 401 #" + client + " " + name + " :No such nick/channel" + CRLF )
 #define ERR_PASSWDMISMATCH(nickname) (": 464 " + nickname + " :Password incorrect !" + CRLF )
 #define ERR_ALREADYREGISTERED(nickname) (": 462 " + nickname + " :You may not reregister !" + CRLF )
 #define ERR_NONICKNAMEGIVEN ": 431 :No nickname given\r\n" 
@@ -48,5 +48,6 @@
 #define ERR_CANNOTSENDTOCHAN(p1, p2) " 404 " + p1 + " " + p2 + " :Cannot send to channel\r\n"
 #define RPL_INVITING(client, nick, channel) ":341 " + client + " " + nick + " " + channel + "\r\n"
 #define RPL_TOPIC(client, channel, topic) ":332 " + client + " " + channel + " " + topic + "\r\n"
-#define RPL_NOTOPIC(client, channel) ":331 " + client + " " + channel + " No topic is set\r\n" 
+#define RPL_NOTOPIC(client, channel) ":331 " + client + " " + channel + " No topic is set\r\n"
+
 #endif
