@@ -10,7 +10,10 @@
 #include <map>
 #include "replies.hpp"
 #include "convert.hpp"
+<<<<<<< HEAD
 
+=======
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 
 Server::Server(int port, const std::string& password){
     this->port = port;
@@ -27,6 +30,10 @@ Server::Server(int port, const std::string& password){
     this->isSetNick  = false;
     this->isSetPass = false;
     this->isSetUser = false;
+<<<<<<< HEAD
+=======
+    this->server_channels = new std::map<std::string, Channel >();
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 
 }        
 bool Server::signal = false;
@@ -108,6 +115,47 @@ bool Server::initialize()
     getDate(&startdate);
     return true;
 }
+<<<<<<< HEAD
+=======
+void Server::send_private_message(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map){
+    size_t spacePos = data.find(' ');
+    if (spacePos != std::string::npos) {
+        std::string target = data.substr(0, spacePos);
+        std::string message = data.substr(spacePos + 1);
+        if(message[0] != ':') {
+            sendError(clientSocket, ERR_NOTEXTTOSEND(clients_Map[clientSocket].nickname));
+            return;
+        }
+        std::string senderNickname;
+        std::string senderUsername;
+        for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) { 
+            if (it->first == clientSocket) {
+                senderNickname = it->second.nickname;
+                senderUsername = it->second.username;
+                break;
+            }
+        }
+        int recipientFd = -1;
+        for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
+            if (it->second.nickname == target) {
+                recipientFd = it->first;
+                break;
+            }
+        }
+        if (recipientFd == -1) {
+            sendError(clientSocket, ERR_NOSUCHNICK(clients_Map[clientSocket].nickname, target));
+        }
+        else {
+            std::string messageToSend = ":" + senderNickname + "!~" + senderUsername + "@" + "localhost PRIVMSG " + target + message + "\r\n";
+            send(recipientFd, messageToSend.c_str(), messageToSend.size(), 0);
+        }
+    }
+    else {
+        sendError(clientSocket, ERR_NOTEXTTOSEND(clients_Map[clientSocket].nickname));
+        return;
+    }
+}
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 
 void Server::parse_commands(Client *client, std::string& data)
 {
@@ -137,7 +185,32 @@ void Server::parse_commands(Client *client, std::string& data)
         join(data.substr(4), client);
     else if (parameters[0] == "MODE")
     {
+<<<<<<< HEAD
         mode(data.substr(4), client);
+=======
+        return true;
+    }
+    return false;
+}
+
+void Server::notifyClients(int clientSocket, std::map<int, Client >& clients_Map, std::string oldNick){
+    std::string nickChangeMsg = RPL_NICKCHANGE(oldNick, clients_Map[clientSocket].nickname);
+    for(std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
+        if(it->first != clientSocket) {
+            send(it->first, nickChangeMsg.c_str(), nickChangeMsg.size(), 0);
+        }
+    }
+}
+
+std::vector<std::string> Server::split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) { // getline reads characters from the input stream and places them into a string until the delimeter is found
+        if (!item.empty()) {
+            elems.push_back(item); 
+        }
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
     }
         // else if (upcommand == "PONG")
         //     return ;
@@ -145,9 +218,174 @@ void Server::parse_commands(Client *client, std::string& data)
         sendData(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, data));
 }
 
+<<<<<<< HEAD
 Server::~Server()
 {
     // shutdown();
+=======
+void Server::check_user(int clientSocket, const std::string&d , std::map<int, Client >& clients_Map, Client& client){
+    std::string data = d;
+    toUpperCase(data);
+    std::vector<std::string> parts = split(data, ' '); // split the string into parts
+    if (parts.empty()) return;
+
+    std::string command = parts[0];
+    parts.erase(parts.begin());
+
+    if (parts.size() < 4) {
+        sendError(clientSocket, ERR_NOTENOUGHPARAM(clients_Map[clientSocket].nickname));
+        return;
+    }
+    std::string username = parts[0];
+    std::string realname = parts[4];        
+    clients_Map[clientSocket].username = username;
+    clients_Map[clientSocket].realname = realname;
+
+
+    client.userSet = true;
+}
+
+bool Server::sendMessage(int fd, const std::string& message) {
+    std::string formattedMessage = message;
+    if (formattedMessage.back() != '\n') { 
+        formattedMessage += "\r\n";
+    }
+
+    ssize_t bytesSent = send(fd, formattedMessage.c_str(), formattedMessage.length(), 0);
+    
+    if (bytesSent == -1) {
+        std::cerr << "Failed to send message: " << std::strerror(errno) << std::endl;
+        return false;
+    }
+    return true;
+}
+
+void Server::sendWelcomeMessages(int clientSocket, std::map<int, Client >& clients_Map) {
+    std::string welcomeMsg = clients_Map[clientSocket].nickname + " :Welcome to the Server, " + 
+                             clients_Map[clientSocket].nickname + "!<" + clients_Map[clientSocket].username + ">@127.0.0.1";
+    sendMessage(clientSocket, welcomeMsg);
+
+    std::string yourHostMsg = clients_Map[clientSocket].nickname + " :Your host is " + 
+                              ">@127.0.0.1" + ", running version " + "1.0";
+    sendMessage(clientSocket, yourHostMsg);
+
+    std::string createdMsg = clients_Map[clientSocket].nickname  + " :This server was created " + 
+                             "2024" + " and is running version " + "1.0";
+    sendMessage(clientSocket, createdMsg);
+}
+
+void Server::check_Quit(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map)
+{
+    std::string reason = "Quit";
+    size_t reasonIndex = data.find(" ");
+    if (reasonIndex != std::string::npos) {
+        reason = data.substr(reasonIndex + 1);
+    }
+
+
+    //until we have channels ready to notify the clients that shares the same channel
+
+    // std::string quitMessage = ":" + clients_Map[clientSocket].nickname + "!" + clients_Map[clientSocket].username + "@localhost QUIT :" + reason;    
+    // for (std::map<int, Client>::iterator it = clients_Map.begin(); it != clients_Map.end(); ++it) {
+    //     if (it->first != clientSocket) {
+    //         sendMessage(it->first, quitMessage);
+    //     }
+    // }
+    std::cout << "Server acknowledges QUIT command." << std::endl;
+    close(clientSocket);
+    clients_Map.erase(clientSocket);
+
+    //delete client from the channel
+}
+
+bool Server::check_Nick(int clientSocket, std::string value, std::map<int, Client >& clients_Map){
+    if (value.empty()) {
+        sendError(clientSocket, ERR_NONICKNAME(clients_Map[clientSocket].nickname));
+        return false;
+    }
+    if (value[0] == '#' || value[0] == ':' || (isdigit(value[0]))) {
+        sendError(clientSocket, ERR_ERRONEUSNICK(value));
+        return false;
+    }
+    return true;
+}
+
+
+
+void Server::parse_commands(int clientSocket, const std::string& data, std::map<int, Client >& clients_Map){
+
+    // Channel defaultChannel;
+    // Channel nameChannel("server_Channels");
+    if(isCommand(data) == false){
+        isServerCommand = true;
+        sendError(clientSocket, ERR_CMDNOTFOUND(clients_Map[clientSocket].nickname, data));
+        return;
+    }
+    Client &client = clients_Map[clientSocket];
+    client.clientSocket = clientSocket;
+
+    size_t spacePos = data.find(' ');
+    
+        std::string command = data.substr(0, spacePos);
+        std::string upcommand = toUpperCase(command);
+        std::string value;
+        if (spacePos == std::string::npos)
+            value = "";
+        else
+            value = data.substr(spacePos + 1);
+        value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+        value.erase(std::remove(value.begin(), value.end(), '\n'), value.end());
+    
+        if (upcommand == "PASS")
+            passCommand(clientSocket, client, value);
+        else if (upcommand == "NICK")
+            nickCommand(clientSocket, clients_Map, value);
+        else if(upcommand == "PRIVMSG")
+        {
+            privmsgCommand(clientSocket, clients_Map, value);
+        }
+        else if(upcommand == "QUIT")
+        {
+            check_Quit(clientSocket, data, clients_Map);
+            isServerCommand = true;
+        }
+        else if (upcommand == "JOIN")
+        {
+           join(value, clientSocket, clients_Map);
+             
+        //         std::map<std::string, Channel >::iterator itt;
+        //         std::map<int, Client>::iterator it;
+    
+        //    for (itt = server_channels->begin(); itt != server_channels->end();++itt) {
+        //         std::cout << itt->second.getName() << " channel" << std::endl;
+        //              for (it = itt->second.getmembers()->begin(); it != itt->second.getmembers()->end();++it) {
+        //                      std::cout << it->second.nickname << " client " << std::endl;
+        //                 }
+        // }
+        }
+        else if (upcommand == "MODE")
+        {
+           mod(value, clientSocket,  clients_Map);
+        }
+        if(client.passSet && client.userSet && client.nickSet) {
+            client.isRegistered = true;
+            if(client.welcome_msg == 1)
+                sendWelcomeMessages(clientSocket, clients_Map);
+            client.welcome_msg++;
+        }
+    
+    // else {
+    //     sendError(clientSocket, ERR_NOTENOUGHPARAM(clients_Map[clientSocket].nickname));
+    //     return;
+    // }
+}
+
+std::string Server::toUpperCase(std::string& str) {
+    for (size_t i = 0; i < str.length(); ++i) {
+        str[i] = std::toupper(static_cast<unsigned char>(str[i]));
+    }
+    return str;
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 }
 
 /************************************************JOIN***************************************************************/

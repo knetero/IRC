@@ -1,5 +1,9 @@
 #include "channel.hpp"
 #include <string>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -16,6 +20,7 @@
 
 
 
+<<<<<<< HEAD
 Channel::Channel(void)
 {
     this->size = 0;
@@ -24,6 +29,17 @@ Channel::Channel(void)
     this->protectedTopic = false;
 }
 
+=======
+Channel::Channel(void) {
+    this->size = -1;
+    this->limit = -1;
+    this->members = new std::map<int, Client >();
+    this->operators = new std::map<int, Client >();
+    this->invited_clients = new std::map<int, Client >();
+    this->inviteonly = false;
+    this->otopic = false;
+}
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 std::string strTrim( std::string s1,  std::string set) {
     size_t start = 0;
     size_t end = s1.length();
@@ -102,7 +118,11 @@ std::string Channel::getmodes()
     return (modes);
 }
 
+<<<<<<< HEAD
 std::string &Channel::gettopic()
+=======
+std::string Channel::gettopic()
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 {
     return (topic);
 }
@@ -112,23 +132,37 @@ std::string Channel::getpassword()
     return (password);
 }
 
+<<<<<<< HEAD
 std::map<int, Client * >  &Channel::getmembers()
+=======
+std::map<int, Client > * Channel::getmembers()
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 {
     return (this->members);
 }
 
+<<<<<<< HEAD
 std::map<int,  Client  *>   &Channel::getinvited()
 {
     return (invited_clients);
 }
 
 std::map<int, Client * >  &Channel::getoperators()
+=======
+std::map<int,  Client >  * Channel::getinvited()
+{
+        return (invited_clients);
+}
+
+std::map<int, Client > * Channel::getoperators()
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 {
     return (operators);
 }
 
 void Channel::add_user(Client * c, int clientsocket, int type)
 {
+<<<<<<< HEAD
     if (type == 0 && members.find(clientsocket) == members.end())
     {
         members.insert(std::make_pair(clientsocket, c));
@@ -140,10 +174,24 @@ void Channel::add_user(Client * c, int clientsocket, int type)
     else if(type == -1 && invited_clients.find(clientsocket) == invited_clients.end())
     {
         invited_clients.insert(std::make_pair(clientsocket, c));
+=======
+    if (type == 0 && members->find(clientsocket) == members->end())
+    {
+        members->insert(std::make_pair(clientsocket, *c));
+    }
+    else if(type == 1 && operators->find(clientsocket) == operators->end())
+    {
+        operators->insert(std::make_pair(clientsocket, *c));
+    }
+    else if(type == -1 && invited_clients->find(clientsocket) == invited_clients->end())
+    {
+        invited_clients->insert(std::make_pair(clientsocket, *c));
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
     }
     
 }
 
+<<<<<<< HEAD
 std::string Channel::getMemberNames()
 {
        std::string memberNames;
@@ -162,6 +210,42 @@ std::string Channel::getMemberNames()
     if (!memberNames.empty() && memberNames[memberNames.size() - 1] == ' ')
     {
         memberNames = memberNames.substr(0, memberNames.size() - 1);
+=======
+// std::string Channel::getMemberNames()
+// {
+//     std::string memberNames = "";
+//     std::string res;
+//     for (std::map<int, Client >::const_iterator it = members->begin(); it != members->end(); ++it) {
+//         std::string nickname = it->second.nickname;
+//         if (operators->find(it->first) != operators->end()) {
+//             memberNames += "@" + nickname + " ";
+//             res.insert (0,  memberNames);
+//         } else {
+//             memberNames += nickname + " ";
+//             res.insert (res.length(),     memberNames);
+//         }
+//     }
+//     return res;
+// }
+
+std::string Channel::getMemberNames()
+{
+    std::string memberNames;
+    
+    for (std::map<int, Client>::const_iterator it = members->begin(); it != members->end(); ++it) {
+        if (operators->find(it->first) != operators->end()) {
+            memberNames += "@" + it->second.nickname + " ";
+        }
+    }
+
+    for (std::map<int, Client>::const_iterator it = members->begin(); it != members->end(); ++it) {
+        if (operators->find(it->first) == operators->end()) {
+            memberNames += it->second.nickname + " ";
+        }
+    }
+    if (!memberNames.empty() && memberNames.back() == ' ') {
+        memberNames.pop_back();
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
     }
 
     return memberNames;
@@ -191,6 +275,7 @@ int valideName(std::string s)
     return (1);
 }
 
+<<<<<<< HEAD
 ////
 
 int Channel::clientExist(std::string name)
@@ -231,3 +316,5 @@ int Channel::removeUser(Client *client)
 
     return (0);
 }
+=======
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2

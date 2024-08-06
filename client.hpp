@@ -35,6 +35,7 @@ class Client {
 
 
         int get_client_socket();
+        std::vector<Channel *> joinedChannels;
 };
 
 #endif

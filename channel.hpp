@@ -18,18 +18,34 @@ class Channel {
         std::string topic;
         std::string password;
         int size;
+<<<<<<< HEAD
         // int limit;
         std::map<int, Client *>  members;
         std::map<int, Client *> operators;
         std::map<int, Client *>  invited_clients;
+=======
+        int limit;
+        std::map<int, Client >  *members;
+        std::map<int, Client > * operators;
+        std::map<int, Client >  * invited_clients;
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 
 
         // Constructeur de la classe Channel
     public:
+<<<<<<< HEAD
         int limit;
         bool hasTopic;
         bool protectedTopic;
         bool inviteonly;
+=======
+        bool otopic;
+        bool inviteonly;
+    // Channel(std::map<int, Client>* members,
+    //              std::map<int, Client >* operators,
+    //              std::map<int, Client >* kicked_clients,
+    //              std::map<int, Client >* invited_clients);
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
         void setName(std::string name);  
         void settype(std::string type);  
         void setmodes(std::string modes);  
@@ -43,6 +59,7 @@ class Channel {
         int getlimit();  
         std::string gettype();  
         std::string getmodes();  
+<<<<<<< HEAD
         std::string &gettopic();  
         std::string getpassword();
 
@@ -55,6 +72,17 @@ class Channel {
         int clientExist(std::string name);
         Channel(void);
         ~Channel(){std::cout << "channel destructor" << std::endl;}
+=======
+        std::string gettopic();  
+        std::string getpassword();
+
+        std::map<int, Client >  *getmembers();
+        std::map<int, Client >  *getinvited();
+        std::map<int, Client >  *getoperators();
+        void add_user(Client * c , int clientsocket, int type); 
+        std::string getMemberNames();
+        Channel(void);
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 
 };
 std::string UpperCaseStr(std::string s);

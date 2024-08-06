@@ -109,5 +109,13 @@ int main(int ac , char** av)
     }
     Server server(atoi(av[1]), av[2]);
     // signal(SIGINT, server.signalHandler);
+<<<<<<< HEAD
     run_server(server);
+=======
+    run_server(server, clients);
+
+
+     
+        return(0);
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
 }

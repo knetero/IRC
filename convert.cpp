@@ -3,6 +3,7 @@
 bool is_int(std::string param)
 {
     int result = 0;
+<<<<<<< HEAD
     // int sign ;
     size_t index = 0;
 
@@ -10,6 +11,16 @@ bool is_int(std::string param)
         // if((param[index] = '-'))
         //     sign = -1;
         index++;
+=======
+    int sign = 1;
+    size_t index = 0;
+
+    if (index < param.length() && (param[index] == '-' || param[index] == '+')) {
+        if((param[index] = '-'))
+            sign = -1;
+        index++;
+            return (false);
+>>>>>>> 858be78f1c14a9e55cae2f94e6ebc520112464a2
     }
 
     while (index < param.length()) {
