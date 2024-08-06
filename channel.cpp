@@ -18,13 +18,10 @@
 
 Channel::Channel(void)
 {
-    this->size = -1;
+    this->size = 0;
     this->limit = -1;
     this->hasTopic = false;
     this->protectedTopic = false;
-    // this->members = new std::map<int, Client >();
-    // this->operators = new std::map<int, Client >();
-    // this->invited_clients = new std::map<int, Client >();
 }
 
 std::string strTrim( std::string s1,  std::string set) {

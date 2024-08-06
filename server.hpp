@@ -76,7 +76,7 @@ class Server {
     
         void                        welcomeMessage(int fd, Client *client);
         int                         get_nick(std::string chName, std::string nickname);
-        int                         check_properties(Channel &channel, std::string mdp, Client *client);
+        int                         check_properties(Channel *channel, std::string mdp, Client *client);
         void                        sendData(int fd, std::string data);
         void                        broadcastToChannels(std::string nickname, Client *c);
         std::string                 getIp(struct sockaddr_in addr);
@@ -88,6 +88,8 @@ class Server {
         void send_info(Channel &chName, std::string msg);
         int channelExist(std::string channelName);
         void broadcastTopic(Channel *channel, Client *client, std::string topic);
+        void send_info(Channel *chName, std::string msg);
+
 
 
         // Commands
@@ -99,7 +101,7 @@ class Server {
         void                        inviteCommand(Client *client, std::vector<std::string> &parameters);
         void                        topicCommand(Client *client, std::vector<std::string> &parameters);
         void                        join(std::string value, Client *client);
-        void                        mod(std::string value, Client * client);
+        void                        mode(std::string value, Client *client);
         //
 };
 

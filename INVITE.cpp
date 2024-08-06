@@ -38,3 +38,5 @@ void                        Server::inviteCommand(Client *client, std::vector<st
     else
         sendData(client->clientSocket, ERR_NOTREGISTERED(client->nickname));
 }
+
+//    channel->add_user(client, client->clientSocket, -1); in place of client->clientSocket you should get the socket of the second param after the invite command not addd the command owner to the invite list

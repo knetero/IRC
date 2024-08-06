@@ -30,7 +30,7 @@
 #define ERR_NOTEXTTOSEND(nickname) (": 412 " + nickname + " :No text to send" + CRLF)
 #define ERR_CHANOPRIVSNEEDED(nickname, channelname) (": 482 " + nickname + " " + channelname + " :You're not channel operator" + CRLF)
 #define ERR_NOSUCHCHANNEL(nickname, channelname) (": 403 " + nickname + " " + channelname +  " :No such channel" + CRLF)
-#define RPL_CHANNELMODEIS(nickname, channelname, modestring) (": 324 " + nickname + " " + channelname +  " : " + modestring + CRLF)
+#define RPL_CHANNELMODEIS(nickname, channelname, modestring) (":"+ nickname + " MODE #" + channelname +  " +" + modestring + CRLF)
 #define RPL_SENDMODEIS(nickname, channelname, modestring, sign , arg) ( nickname + " MODE " + channelname +  " : " + sign +  modestring + arg + CRLF)
 #define ERR_BADCHANNELKEY(nickname, channelname) ( ": 475 " +  nickname + " " + channelname + " :Cannot join channel (+k)" + CRLF )
 #define ERR_CHANNELISFULL(nickname, channelname) ( ": 471 " + nickname + " " + channelname +" :Cannot join channel (+l)" +  CRLF)
@@ -39,8 +39,8 @@
 // #define RPL_TOPIC(nickname, channelname, topic) ( ": 332 " + nickname + " " + channelname +" " + topic +  CRLF)
 #define RPL_JOIN(nickname, channelname ) ( nickname + " is joining the channel " + channelname  +  CRLF)
 #define ERR_NEEDMOREPARAMS(nickname, channelname ) ( ": 332 " + nickname + channelname + " :Not enough parameters" +  CRLF)
-#define RPL_NAMREPLY(nickname, channelname, names ) ( ": 353  :127.0.0.1 " + nickname + " = #" + channelname + " : " +names+ CRLF)
-#define RPL_ENDOFNAMES(nickname, channelname ) ( ": 366 :127.0.0.1 " + nickname + " #" + channelname + " :End of /NAMES list" + CRLF)
+#define RPL_NAMREPLY(adress,nickname, channelname, names ) ( ":"+adress+" 353 " + nickname + " = #" + channelname  +" :"+names+"\r\n")
+#define RPL_ENDOFNAMES(adress, nickname, channelname ) ( ":"+adress+" 366 " + nickname  + " #" + channelname + " :End of /NAMES list." +"\r\n")
 #define ERR_USERNOTINCHANNEL(p1, p2, p3) ": 441 " + p1 + " " + p2 + " " + p3 + " :They aren't on that channel\r\n"
 #define ERR_NOTONCHANNEL(p1, p2) ": 442 " + p1 + " " + p2 + " " + ": You're not on that channel\r\n"
 #define ERR_USERONCHANNEL(client, nick, channel) ": 443 " + client + " " + nick + " " + channel + " :is already on channel\r\n"
@@ -48,5 +48,6 @@
 #define ERR_CANNOTSENDTOCHAN(p1, p2) " 404 " + p1 + " " + p2 + " :Cannot send to channel\r\n"
 #define RPL_INVITING(client, nick, channel) ":341 " + client + " " + nick + " " + channel + "\r\n"
 #define RPL_TOPIC(client, channel, topic) ":332 " + client + " " + channel + " " + topic + "\r\n"
+#define RPL_TTOPIC(client,username, channel,adress, topic)  ":" + client + "!" + username + "@" + adress + " TOPIC " + channel + " :" + topic +"\r\n" 
 #define RPL_NOTOPIC(client, channel) ":331 " + client + " " + channel + " No topic is set\r\n" 
 #endif

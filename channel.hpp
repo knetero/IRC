@@ -18,7 +18,7 @@ class Channel {
         std::string topic;
         std::string password;
         int size;
-        int limit;
+        // int limit;
         std::map<int, Client *>  members;
         std::map<int, Client *> operators;
         std::map<int, Client *>  invited_clients;
@@ -26,6 +26,7 @@ class Channel {
 
         // Constructeur de la classe Channel
     public:
+        int limit;
         bool hasTopic;
         bool protectedTopic;
         bool inviteonly;
