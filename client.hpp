@@ -11,15 +11,20 @@
 #include <iostream>
 
 class Server;
-
+class Channel;
 class Client {
     public:
-        std::map<int , Client> clients_Map;
-        int clientSocket;
-        std::map<int, std::string> clientBuffers;
-        std::string nickname;
-        std::string username;
-        std::string realname;
+        int                 clientSocket;
+        struct sockaddr_in  clientAdress;
+        std::string         nickname;
+        std::string         username;
+        std::string         realname;
+        std::string         buffer;
+        bool                passSet;
+        bool                nickSet;
+        bool                userSet;
+        bool                isRegistered;
+        std::vector<Channel> joinedChannels;
 
         Client();
         Client(int clientSocket);
@@ -28,11 +33,6 @@ class Client {
         ~Client();
 
 
-        bool passSet;
-        bool nickSet;
-        bool userSet;
-        bool isRegistered;
-        int welcome_msg;
 
         int get_client_socket();
 };
