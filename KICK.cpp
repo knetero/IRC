@@ -46,7 +46,7 @@ void Server::kickCommand(Client *client, std::vector <std::string> &parameters)
         // check the channel exist;
         if (channelExist(parameters[1]) == -1)
         {
-            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[1]));
+            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[1], getIp(client->clientAdress)));
             return ;
         }
         
