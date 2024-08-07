@@ -19,7 +19,7 @@
 
 #define RPL_NICKCHANGE(oldnickname, nickname) (oldnickname + " changed his nickname to " + nickname + "."+ CRLF)
 #define ERR_NOTENOUGHPARAM(nickname) (": 461 " + nickname + " :Not enough parameters." + CRLF)
-#define ERR_NOSUCHNICK(channelname, name) (": 401 #" + channelname + " " + name + " :No such nick/channel" + CRLF )
+#define ERR_NOSUCHNICK(nickname, channelname , username, adress) ":" + nickname + "!" + username + "@" + adress +" 482 " + nickname +" "+ channelname +  " :No such nick/channel" + CRLF
 #define ERR_PASSWDMISMATCH(nickname) (": 464 " + nickname + " :Password incorrect !" + CRLF )
 #define ERR_ALREADYREGISTERED(nickname) (": 462 " + nickname + " :You may not reregister !" + CRLF )
 #define ERR_NONICKNAMEGIVEN ": 431 :No nickname given\r\n" 
@@ -29,6 +29,7 @@
 #define ERR_CMDNOTFOUND(nickname, command) (": 421 " + nickname + " " + command + " :Unknown command" + CRLF)
 #define ERR_NOTEXTTOSEND(nickname) (": 412 " + nickname + " :No text to send" + CRLF)
 #define ERR_CHANOPRIVSNEEDED(nickname, channelname) (": 482 " + nickname + " " + channelname + " :You're not channel operator" + CRLF)
+#define ERRR_CHANOPRIVSNEEDED(nickname, channelname , username, adress) (":" + nickname + "!" + username + "@" + adress +" 482 " + nickname +" "+ channelname +  " :You're not channel operator" + CRLF)
 #define ERR_NOSUCHCHANNEL(nickname, channelname) (": 403 " + nickname + " " + channelname +  " :No such channel" + CRLF)
 #define RPL_CHANNELMODEIS(nickname, channelname, modestring) (":"+ nickname + " MODE #" + channelname +  " +" + modestring + CRLF)
 #define RPL_SENDMODEIS(nickname, channelname, modestring, sign , arg) ( nickname + " MODE " + channelname +  " : " + sign +  modestring + arg + CRLF)

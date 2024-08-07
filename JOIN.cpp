@@ -436,7 +436,8 @@ void Server::join(std::string value, Client *client)
             if(ch[0] != '#')
             {
                 sendData(client->clientSocket, ERR_BADCHANMASK(ch));
-                while((getline(ss, ch, ',') && ch[0] != '#' ));
+                std::cout << "kkkk"<<std::endl;
+                // while((getline(ss, ch, ',') && ch[0] != '#' ));
             }
             if(ch[0] == '#')
             {
@@ -449,6 +450,7 @@ void Server::join(std::string value, Client *client)
             if(ch[0] != '#')
             {
                 sendData(client->clientSocket, ERR_BADCHANMASK(ch));
+                std::cout << "sss"<<std::endl;
                 while((getline(ss, ch, ',') && ch[0] != '#' ));
             }
             if(ch[0] == '#')
@@ -579,7 +581,12 @@ void Server::mode(std::string value, Client *client)
         {
             args.push_back(strTrim( channel , " "));
         }
-    } 
+    }
+        if (args.empty())
+        {
+            sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "MODE"));
+            return;
+        }
         if (!args[0].empty() && args[0][0] == '#' && server_channels.find(args[0].substr(1)) != server_channels.end())
         {
             if (args.size() <= 1 && server_channels.find(args[0].substr(1)) != server_channels.end())
@@ -624,14 +631,14 @@ void Server::mode(std::string value, Client *client)
                                 modestr.append(1, modes[i][j]);
                                 ss.erase(std::remove(ss.begin(), ss.end(), modes[i][j]), ss.end());
                                 server_channels.find(args[0].substr(1))->second->setmodes(ss);
-                                // if (modes[i][j] == 'l')
-                                //     server_channels.find(args[0].substr(1))->second->limit = -1;
-                                // else if (mode[i][j] == 't')
-                                //     server_channels.find(args[0].substr(1))->second->protectedTopic = false;
-                                // else if (mode[i][j] == 'i')
-                                //     server_channels.find(args[0].substr(1))->second->inviteonly = false;
-                                // else if (mode[i][j] == 'o' && !args[2].empty() &&  get_nick(args[0], args[2]) != -1)
-                                //     removeUser(serverClients[get_nick(args[0], args[2])]);
+                                if (modes[i][j] == 'l')
+                                    server_channels.find(args[0].substr(1))->second->limit = -1;
+                                else if (modes[i][j] == 't')
+                                    server_channels.find(args[0].substr(1))->second->protectedTopic = false;
+                                else if (modes[i][j] == 'i')
+                                    server_channels.find(args[0].substr(1))->second->inviteonly = false;
+                                else if (modes[i][j] == 'o' && !args[2].empty() &&  get_nick(args[0], args[2]) != -1)
+                                    server_channels.find(args[0].substr(1))->second->removeUser(serverClients[get_nick(args[0], args[2])]);
                             }
                         }
                         else if (server_channels.find(args[0].substr(1))->second->getoperators().find(client->clientSocket)->first != client->clientSocket)
@@ -695,11 +702,17 @@ void Server::mode(std::string value, Client *client)
                                 }
 
                             }
-                            else if (modes[i][j] == 'o' && !args[2].empty() &&  get_nick(args[0], args[2]) != -1)
+                            else if (modes[i][j] == 'o' && !args[2].empty() )
                             {
+                                if (get_nick(args[0], args[2]) != -1)
+                                {
                                         modestr.append(1, modes[i][j]);
                                         modeargs.append(" "+args[2]+" ");
-                                server_channels.find(args[0].substr(1))->second->add_user(serverClients[get_nick(args[0], args[2])],get_nick(args[0], args[2]) ,1 );
+                                        server_channels.find(args[0].substr(1))->second->add_user(serverClients[get_nick(args[0], args[2])],get_nick(args[0], args[2]) ,1 );
+
+                                }
+                                else
+                                    sendData(client->clientSocket, ERR_NOSUCHNICK(serverClients[client->clientSocket]->nickname,serverClients[client->clientSocket]->username,getIp(client->clientAdress), server_channels.find(args[0].substr(1))->second->getName()));
                             }
                                 //  msg = ":127.0.0.1 324 " + serverClients[client->clientSocket]->nickname + " #" + server_channels.find(args[0].substr(1))->second->getName() +" +"+ server_channels.find(args[0].substr(1))->second->getmodes()+"\r\n";
                                 //  sendData(client->clientSocket, msg);
