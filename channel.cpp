@@ -127,19 +127,19 @@ std::map<int, Client * >  &Channel::getoperators()
     return (operators);
 }
 
-void Channel::add_user(Client * c, int clientsocket, int type)
+void Channel::add_user(Client * c, int type)
 {
-    if (type == 0 && members.find(clientsocket) == members.end())
+    if (type == 0 && members.find(c->clientSocket) == members.end())
     {
-        members.insert(std::make_pair(clientsocket, c));
+        members.insert(std::make_pair(c->clientSocket, c));
     }
-    else if(type == 1 && operators.find(clientsocket) == operators.end())
+    else if(type == 1 && operators.find(c->clientSocket) == operators.end())
     {
-        operators.insert(std::make_pair(clientsocket, c));
+        operators.insert(std::make_pair(c->clientSocket, c));
     }
-    else if(type == -1 && invited_clients.find(clientsocket) == invited_clients.end())
+    else if(type == -1 && invited_clients.find(c->clientSocket) == invited_clients.end())
     {
-        invited_clients.insert(std::make_pair(clientsocket, c));
+        invited_clients.insert(std::make_pair(c->clientSocket, c));
     }
     
 }

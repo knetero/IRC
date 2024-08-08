@@ -475,7 +475,7 @@ void Server::join(std::string value, Client *client)
                     //    return;
                     // }
                     // member = new Client(serverClients[client->clientSocket]);
-                    element->second->add_user(client, client->clientSocket, 0);
+                    element->second->add_user(client, 0);
                     element->second->setSize(element->second->getSize()+1);
                     msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +element->second->getName()+"\r\n";
                     send_info(element->second, msg);
@@ -496,7 +496,8 @@ void Server::join(std::string value, Client *client)
                 return;
             }
         }
-        else {
+        else 
+        {
             Channel *chn = new Channel();
             chn->setName(it->first.substr(1));
             if (map_channels[it->first].compare("-1") != 0)
@@ -506,8 +507,8 @@ void Server::join(std::string value, Client *client)
             }
                 server_channels.insert (std::make_pair(it->first.substr(1),chn));
                 // member = new Client(serverClients[client->clientSocket]);
-                server_channels.find(it->first.substr(1))->second->add_user(client, client->clientSocket, 1);
-                server_channels.find(it->first.substr(1))->second->add_user(client, client->clientSocket, 0);
+                server_channels.find(it->first.substr(1))->second->add_user(client, 1);
+                server_channels.find(it->first.substr(1))->second->add_user(client, 0);
                 chn->setSize(chn->getSize()+1);
                 msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +chn->getName()+"\r\n";
                 sendData(client->clientSocket, msg);
@@ -652,7 +653,7 @@ void Server::mode(std::string value, Client *client)
                                         modeargs.append(" "+args[2]+" ");
                                         std::cout << "args[2]     "<<cast_int(args[2]) << " |||||| " << std::endl;
                                         server_channels.find(args[0].substr(1))->second->setlimit(cast_int(args[2]));
-                                        args.erase(std::next(args.begin(), 2));
+                                        args.erase(args.begin() + 2);
                                         ss = server_channels.find(args[0].substr(1))->second->getmodes() + modes[i][j];
                                         server_channels.find(args[0].substr(1))->second->setmodes(ss);
 
@@ -673,7 +674,7 @@ void Server::mode(std::string value, Client *client)
                                     server_channels.find(args[0].substr(1))->second->setpassword(args[2]);
                                     ss = server_channels.find(args[0].substr(1))->second->getmodes() + modes[i][j];
                                     server_channels.find(args[0].substr(1))->second->setmodes(ss);
-                                        args.erase(std::next(args.begin(), 2));
+                                        args.erase(args.begin() + 2);
                                         std::cout << "args[2]     "<< args[2] << " |||||| " << std::endl;
                                 }
                                 else
@@ -699,7 +700,7 @@ void Server::mode(std::string value, Client *client)
                             {
                                         modestr.append(1, modes[i][j]);
                                         modeargs.append(" "+args[2]+" ");
-                                server_channels.find(args[0].substr(1))->second->add_user(serverClients[get_nick(args[0], args[2])],get_nick(args[0], args[2]) ,1 );
+                                server_channels.find(args[0].substr(1))->second->add_user(serverClients[get_nick(args[0], args[2])],1 );
                             }
                                 //  msg = ":127.0.0.1 324 " + serverClients[client->clientSocket]->nickname + " #" + server_channels.find(args[0].substr(1))->second->getName() +" +"+ server_channels.find(args[0].substr(1))->second->getmodes()+"\r\n";
                                 //  sendData(client->clientSocket, msg);
@@ -717,8 +718,11 @@ void Server::mode(std::string value, Client *client)
 
             // }
             if (!modestr.empty() && !modeargs.empty())
+            {
                 msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " MODE " + "#" +server_channels.find(args[0].substr(1))->second->getName() +" "+modestr + modeargs +"\r\n";
                 send_info(server_channels.find(args[0].substr(1))->second, msg);
+
+            }
 
         }
         else

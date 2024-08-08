@@ -12,7 +12,6 @@ void close_all(std::map<int, Client>& clients_Map)
     }
 }
 
-
 void AcceptNewClient(Server& server)
 {
     server.socketId = server.acceptClient();

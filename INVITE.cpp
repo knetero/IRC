@@ -1,6 +1,6 @@
 #include "server.hpp"
 
-void                        Server::inviteCommand(Client *client, std::vector<std::string> &parameters)
+void    Server::inviteCommand(Client *client, std::vector<std::string> &parameters)
 {
     if (client->isRegistered)
     {
@@ -15,7 +15,8 @@ void                        Server::inviteCommand(Client *client, std::vector<st
                     {
                         if (channel->clientExist(parameters[1]) != 1)
                         {
-                            channel->add_user(client, client->clientSocket, -1);
+                            Client *toInvite = this->serverClients[getClientFd(parameters[2])];
+                            channel->add_user(toInvite, -1);
                             sendData(client->clientSocket, RPL_INVITING(client->nickname, parameters[1], parameters[2]));
                             sendData(getClientFd(parameters[1]),\
                             INVITE(client->nickname, client->username, getIp(client->clientAdress), parameters[1], parameters[2]));
