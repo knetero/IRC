@@ -36,32 +36,24 @@ void Server::signalHandler(int signum){
 
 }
 
-int Server::acceptClient() 
+void Server::acceptClient() 
 {
 
     struct sockaddr_in clientAddress; // struct that holds the client address
     socklen_t clientAddressLength = sizeof(clientAddress); // size of the client address struct 
-    int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength); // accept a connection on a socket
+    this->clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength); // accept a connection on a socket
     this->clientAdress = clientAddress;
 
-    if (clientSocket == -1) {
+    if (clientSocket == -1) 
+    {
         std::cerr << "Failed to accept client connection. errno: " << std::endl;
-        return -1;
     }
-    // if (signal) {
-    //     if (Server::signal) {    
-    //         return -1;
-    //     }
-    // }
-
     // Set the socket to non-blocking mode
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
         std::cerr << "Failed to set client socket to non-blocking mode." << std::endl;
         close(clientSocket);
     }
-
     std::cout << GREEN << "[+] Client connected, client fd: " << RESET << clientSocket << std::endl;
-    return clientSocket;
 }
 
 bool Server::initialize()
@@ -118,7 +110,7 @@ void Server::parse_commands(Client *client, std::string& data)
         return ;
     parameters[0] = toUpperCase(parameters[0]);
     ////
-    std::cout << "data : "<<data <<std::endl;
+    std::cout << "data : "<< data <<std::endl;  
     if (parameters[0] == "PASS")
         passCommand(client, parameters);
     else if (parameters[0] == "NICK")

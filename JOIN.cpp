@@ -421,7 +421,7 @@ void Server::join(std::string value, Client *client)
     std::string ch;
     std::getline(iss, channels, ' ');
     std::stringstream ss(strTrim( channels , " ")); 
-        password = value.substr( value.find(" ") + 1,value.size());
+    password = value.substr( value.find(" ") + 1,value.size());
         std::cout<< "password   |"<< password<< std::endl;
         std::cout<< "channels   |"<< channels<< std::endl;
         std::stringstream pa(strTrim( password , " "));
@@ -505,22 +505,21 @@ void Server::join(std::string value, Client *client)
                 chn->setpassword(map_channels[it->first]);
                 chn->setmodes("k");
             }
-                server_channels.insert (std::make_pair(it->first.substr(1),chn));
-                // member = new Client(serverClients[client->clientSocket]);
-                server_channels.find(it->first.substr(1))->second->add_user(client, 1);
-                server_channels.find(it->first.substr(1))->second->add_user(client, 0);
-                chn->setSize(chn->getSize()+1);
-                msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +chn->getName()+"\r\n";
-                sendData(client->clientSocket, msg);
+            server_channels.insert (std::make_pair(it->first.substr(1),chn));
+            server_channels.find(it->first.substr(1))->second->add_user(client, 1);
+            server_channels.find(it->first.substr(1))->second->add_user(client, 0);
+            chn->setSize(chn->getSize()+1);
+            msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +chn->getName()+"\r\n";
+            sendData(client->clientSocket, msg);
+            sendData(client->clientSocket, RPL_NAMREPLY(getIp(client->clientAdress), serverClients[client->clientSocket]->nickname, chn->getName(), chn->getMemberNames() ));
+            sendData(client->clientSocket, RPL_ENDOFNAMES(getIp(client->clientAdress), serverClients[client->clientSocket]->nickname, chn->getName()));
+            if (!chn->gettopic().empty())
+                sendData(client->clientSocket, RPL_TTOPIC(serverClients[client->clientSocket]->nickname,serverClients[client->clientSocket]->username,getIp(client->clientAdress), chn->getName(), chn->gettopic()));
                 // msg = ":"+getIp(client->clientAdress)+" 353 " + serverClients[client->clientSocket]->nickname + " = #" + chn->getName()  +" :"+chn->getMemberNames()+"\r\n";
-                sendData(client->clientSocket, RPL_NAMREPLY(getIp(client->clientAdress), serverClients[client->clientSocket]->nickname, chn->getName(), chn->getMemberNames() ));
                 // msg += ":"+getIp(client->clientAdress)+" 366 " + serverClients[client->clientSocket]->nickname  + " #" + chn->getName() + " :End of /NAMES list." +"\r\n";
-                sendData(client->clientSocket, RPL_ENDOFNAMES(getIp(client->clientAdress), serverClients[client->clientSocket]->nickname, chn->getName()));
                 // sendData(client->clientSocket, RPL_NAMREPLY(serverClients[client->clientSocket]->nickname, chn->getName(), chn->getMemberNames()));
                 // sendData(client->clientSocket, RPL_ENDOFNAMES(serverClients[client->clientSocket]->nickname, chn->getName()));
                 // sendData(client->clientSocket, RPL_CHANNELMODEIS(getIp(client->clientAdress), chn->getName(), chn->getmodes()));
-                if (!chn->gettopic().empty())
-                    sendData(client->clientSocket, RPL_TTOPIC(serverClients[client->clientSocket]->nickname,serverClients[client->clientSocket]->username,getIp(client->clientAdress), chn->getName(), chn->gettopic()));
         }
     }
             
@@ -561,9 +560,6 @@ void Server::send_info(Channel *chName, std::string msg)
 
 void Server::mode(std::string value, Client *client)
 {
-//    (void)clientsocket;
-//    (void)value;
-//    (void)serverClients;
     std::istringstream iss(value);
     std::string channel;
     std::string msg;
@@ -575,12 +571,13 @@ void Server::mode(std::string value, Client *client)
     int k = -1;
     int m = -1;
 
-    while (std::getline(iss, channel, ' ')) {  
+    while (std::getline(iss, channel, ' '))
+    {  
         if (strTrim( channel , " ") != "")
         {
             args.push_back(strTrim( channel , " "));
         }
-    } 
+    }
         if (!args[0].empty() && args[0][0] == '#' && server_channels.find(args[0].substr(1)) != server_channels.end())
         {
             if (args.size() <= 1 && server_channels.find(args[0].substr(1)) != server_channels.end())

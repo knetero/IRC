@@ -41,6 +41,7 @@ class Server {
         Server(int port, const std::string& password);
         struct sockaddr_in serverAddress;
         struct sockaddr_in clientAdress;
+        int                clientSocket;
         std::map<int , Client *>            serverClients;
         std::map<std::string, Channel *>    server_channels;
         char    *startdate;
@@ -50,7 +51,6 @@ class Server {
 
         std::vector<struct pollfd> clientSockets;
         int serverSocket; 
-        int socketId;
         int port; 
         std::string password;
         bool isRunning;
@@ -65,7 +65,7 @@ class Server {
 
 
         bool initialize();
-        int acceptClient();
+        void acceptClient();
         static void signalHandler(int signum);
         void send_private_message(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
         void parse_commands(Client *client, std::string& data);

@@ -5,33 +5,23 @@
 #include "server.hpp"
 // #include <poll.h>
 
-void close_all(std::map<int, Client>& clients_Map)
-{
-    for (size_t i = 0; i < clients_Map.size(); i++){
-        close(clients_Map[i].clientSocket);
-    }
-}
-
 void AcceptNewClient(Server& server)
 {
-    server.socketId = server.acceptClient();
-    if(server.socketId == -1){
-        // close_all(clients.clients_Map);
+    if(server.clientSocket == -1)
+    {
         close(server.serverSocket);
         exit(0);
     }
-    if(server.socketId  != -1)
+    if(server.clientSocket  != -1)
     {
         struct pollfd clientSocket;
-        clientSocket.fd = server.socketId ;
+        clientSocket.fd = server.clientSocket ;
         clientSocket.events = POLLIN;
         server.clientSockets.push_back(clientSocket);
-        // clients.clients_Map[server.socketId] = clients;
-
         // create a new client object, and push it to the map;
-        Client *client = new Client(server.socketId);
-        server.serverClients.insert(std::make_pair(server.socketId, client));
-        server.serverClients[server.socketId]->clientAdress = server.clientAdress;
+        Client *client = new Client(server.clientSocket);
+        server.serverClients.insert(std::make_pair(server.clientSocket, client));
+        server.serverClients[server.clientSocket]->clientAdress = server.clientAdress;
     }
 }
 
@@ -47,22 +37,14 @@ void ReceiveData(Server& server, size_t i)
     {
         std::cout << RED << "[-] Client disconnected, client fd: " << RESET << server.clientSockets[i].fd << std::endl;
         server.serverClients.erase(server.serverClients.find(server.clientSockets[i].fd));
+        server.clientSockets.erase(server.clientSockets.begin() + i);
         close(server.clientSockets[i].fd);
-        // server.clientSockets.erase(server.clientSockets.begin() + i);
         return;
     }
-    // std::cout << "actual server clients" << server.serverClients.size() << std::endl;
     Client *client = server.serverClients[server.clientSockets[i].fd];
     client->buffer.append(server.buffer, bytesRead);
-    // clients.clientBuffers[server.clientSockets[i].fd].append(server.buffer, bytesRead);
-    size_t newlinepos;
-    while((newlinepos = client->buffer.find("\n")) != std::string::npos) 
-    {
-        std::string command = client->buffer.substr(0, newlinepos);
-        server.parse_commands(client, command);
-        client->buffer.erase(0, newlinepos + 2);
-        // clients.clientBuffers[server.clientSockets[i].fd].erase(0, newlinepos + 2);
-    }
+    server.parse_commands(client, client->buffer);
+    client->buffer.clear();
 }
 
 void run_server(Server& server)
@@ -76,13 +58,13 @@ void run_server(Server& server)
     {
         //
         int pollCount = poll(server.clientSockets.data(), server.clientSockets.size(), -1);
-        if (pollCount == -1){
+        if (pollCount == -1)
+        {
             std::cerr << "Poll failed" << std::endl;
             exit(1);
         }
         for(size_t i = 0; i < server.clientSockets.size(); i++)
         {
-            server.isServerCommand = false;
             if (server.clientSockets[i].revents & POLLIN)
             {
                 // Checks if the file descriptor is the server socket. If so, it call AcceptNewClient() to accept a new client connection
