@@ -63,9 +63,10 @@ class Server {
         bool isRegistred;
         static bool signal;
 
-
+        void run_server(void);
         bool initialize();
         void acceptClient();
+        void ReceiveData(size_t i);
         static void signalHandler(int signum);
         void send_private_message(int clientSocket, const std::string& data, std::map<int, Client>& clients_Map);
         void parse_commands(Client *client, std::string& data);
