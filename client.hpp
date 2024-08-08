@@ -25,7 +25,7 @@ class Client {
         bool                userSet;
         bool                isRegistered;
         std::vector<Channel> joinedChannels;
-
+        std::vector<std::string> answerdQuestions;
         Client();
         Client(int clientSocket);
         Client(const Client& other);

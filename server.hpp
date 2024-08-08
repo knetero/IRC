@@ -63,6 +63,8 @@ class Server {
         bool isRegistred;
         static bool signal;
 
+        std::vector<std::pair<std::string, std::string> > botQuestions;
+
         void run_server(void);
         bool initialize();
         void acceptClient();
@@ -93,7 +95,10 @@ class Server {
         void send_info(Channel *chName, std::string msg);
 
 
-
+        void bot(Client *client);
+        void parseQuestionsFile();
+        int isCorrectAnswer(std::string question, std::string answer);
+        std::string generateQuestion(std::vector<std::string> &answerdQuestions);
         // Commands
         void                        passCommand(Client *client, std::vector<std::string> &parameters);
         void                        nickCommand(Client *client, std::vector<std::string> &parameters);

@@ -1,7 +1,8 @@
 CC = c++
 FLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp server.cpp client.cpp channel.cpp convert.cpp PRIVMSG.cpp PASS.cpp NICK.cpp USER.cpp KICK.cpp INVITE.cpp JOIN.cpp TOPIC.cpp tools.cpp
+SRCS = main.cpp server.cpp client.cpp channel.cpp convert.cpp PRIVMSG.cpp PASS.cpp\
+ NICK.cpp USER.cpp KICK.cpp INVITE.cpp JOIN.cpp TOPIC.cpp tools.cpp BOT.cpp
 OBJS = $(SRCS:.cpp=.o)
 NAME = ircserv
 HEADERS = server.hpp  client.hpp replies.hpp channel.hpp convert.hpp

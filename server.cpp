@@ -185,6 +185,8 @@ void Server::parse_commands(Client *client, std::string& data)
     {
         mode(data.substr(4), client);
     }
+    else if (parameters[0] == "BOT")
+        bot(client);
         // else if (upcommand == "PONG")
         //     return ;
     else
