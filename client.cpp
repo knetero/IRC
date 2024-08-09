@@ -17,6 +17,7 @@ Client::Client(int clientSocket)
     this->nickSet = false;
     this->userSet = false;
     this->isRegistered = false;
+    this->totalXps = 0;
 }
 
 Client::Client(const Client& other){

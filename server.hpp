@@ -24,6 +24,7 @@
 #include <sstream>
 #include "replies.hpp"
 #include "channel.hpp"
+#include <sstream>
 
 #define RESET "\033[0m"
 #define RED "\033[31m"                /* Red */
@@ -99,6 +100,8 @@ class Server {
         void parseQuestionsFile();
         int isCorrectAnswer(std::string question, std::string answer);
         std::string generateQuestion(std::vector<std::string> &answerdQuestions);
+        std::string to_string(size_t value);
+
         // Commands
         void                        passCommand(Client *client, std::vector<std::string> &parameters);
         void                        nickCommand(Client *client, std::vector<std::string> &parameters);

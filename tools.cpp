@@ -98,3 +98,10 @@ int Server::channelExist(std::string channelName)
     }
     return -1;
 }
+
+std::string Server::to_string(size_t value)
+{
+    std::ostringstream os ;
+    os << value ;
+    return os.str() ;
+}

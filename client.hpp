@@ -26,6 +26,7 @@ class Client {
         bool                isRegistered;
         std::vector<Channel> joinedChannels;
         std::vector<std::string> answerdQuestions;
+        size_t              totalXps;
         Client();
         Client(int clientSocket);
         Client(const Client& other);

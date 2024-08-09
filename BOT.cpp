@@ -85,6 +85,8 @@ void Server::bot(Client *client)
                     if (question.empty())
                     {
                         sendData(client->clientSocket, "You answerd all the questions\n");
+                        sendData(client->clientSocket, "Your result: ");
+                        sendData(client->clientSocket, to_string(client->totalXps) + "Xps.");
                         return ;
                     }
                     questionGenerated = true;
@@ -97,6 +99,7 @@ void Server::bot(Client *client)
                     {
                         sendData(client->clientSocket, "Correct! +5xp\nPress ENTER to move to next question");
                         client->answerdQuestions.push_back(question);
+                        client->totalXps += 5;
                     }
                     else
                         sendData(client->clientSocket, "Wrong!\nPress ENTER to move to next question");
