@@ -34,8 +34,13 @@ void Server::privmsgCommand(Client *client, std::vector<std::string> &parameters
                 }
                 else
                 {
-                    sendData(getClientFd(parameters[1]), \
-                    PRIVMSG(client->nickname, client->username, getIp(client->clientAdress), targets[i], parameters[2]));
+                    if (serverClients.find(getClientFd(parameters[1])) != serverClients.end())
+                    {
+                        sendData(getClientFd(parameters[1]), \
+                        PRIVMSG(client->nickname, client->username, getIp(client->clientAdress), targets[i], parameters[2]));
+                    }
+                    else
+                        sendData(client->clientSocket, ERR_NOSUCHNICK(client->nickname, parameters[1]));
                 }
             }
         }
