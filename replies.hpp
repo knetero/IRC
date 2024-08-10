@@ -20,6 +20,10 @@
 #define RPL_NICKCHANGE(oldnickname, nickname) (oldnickname + " changed his nickname to " + nickname + "."+ CRLF)
 #define ERR_NOTENOUGHPARAM(nickname) (": 461 " + nickname + " :Not enough parameters." + CRLF)
 #define ERR_NOSUCHNICK(nickname, channelname , username, adress) ":" + nickname + "!" + username + "@" + adress +" 482 " + nickname +" "+ channelname +  " :No such nick/channel" + CRLF
+
+#define ER_NOSUCHNICK(nickname , username, adress, channelname) ":" + nickname + "!" + username + "@" + adress +" 401 " + nickname + " " +channelname +" :No such nick" + CRLF
+#define ERR_NOSUCHMEMBR(nickname , username, adress, channelname) ":" + nickname + "!" + username + "@" + adress +" 441 " + nickname + " " +channelname +" :They aren't on that channel" + CRLF
+
 #define ERR_PASSWDMISMATCH(nickname) (": 464 " + nickname + " :Password incorrect !" + CRLF )
 #define ERR_ALREADYREGISTERED(nickname) (": 462 " + nickname + " :You may not reregister !" + CRLF )
 #define ERR_NONICKNAMEGIVEN ": 431 :No nickname given\r\n" 

@@ -395,7 +395,7 @@ Server::~Server()
 //                         {   
 //                             if (modes[i][j] == 'l')
 //                             {
-//                                 if(!args[2].empty())
+//                                 if(args.size() >= 3)
 //                                 {
 //                                     if (cast_int(args[2]) != -1)
 //                                     {
@@ -415,7 +415,7 @@ Server::~Server()
 //                             }
 //                             else if (modes[i][j] == 'k')
 //                             {
-//                                 if ( !args[2].empty())
+//                                 if ( args.size() >= 3)
 //                                 {
 //                                     server_channels.find(args[0].substr(1))->second->setpassword(args[2]);
 //                                     ss = server_channels.find(args[0].substr(1))->second->getmodes() + modes[i][j];
@@ -430,7 +430,7 @@ Server::~Server()
 //                                 ss = server_channels.find(args[0].substr(1))->second->getmodes() + modes[i][j];
 //                                 server_channels.find(args[0].substr(1))->second->setmodes(ss);
 //                             }
-//                             else if (modes[i][j] == 'o' && !args[2].empty() &&  get_nick(args[0], args[2]) != -1)
+//                             else if (modes[i][j] == 'o' && args.size() >= 3 &&  get_nick(args[0], args[2]) != -1)
 //                             {
 //                                 std::cout <<  " Error 1" << std::endl;
 //                                 server_channels[args[0].substr(1)].add_user(clients_Map[get_nick(args[0], args[2])], get_nick(args[0], args[2]), 1);

@@ -204,6 +204,7 @@ int Channel::clientExist(std::string name)
     return (-1);
 }
 
+
 int Channel::removeUser(Client *client)
 {
     std::map<int, Client *>::iterator it;
@@ -216,7 +217,7 @@ int Channel::removeUser(Client *client)
     }
 
     std::map<int, Client *>::iterator it1;
-    for (it1 = this->getoperators().begin(); it1 != this->getoperators().begin(); it1++)
+    for (it1 = this->getoperators().begin(); it1 != this->getoperators().end(); it1++)
     {
         if (it1->second == client)
             this->getoperators().erase(it1);
@@ -227,6 +228,22 @@ int Channel::removeUser(Client *client)
     {
         if (it2->second == client)
             this->getinvited().erase(it2);
+    }
+
+    return (0);
+}
+
+
+int Channel::removeUserr(Client *client, int k)
+{
+    if (k == 1)
+    {
+        std::map<int, Client *>::iterator it1;
+        for (it1 = this->getoperators().begin(); it1 != this->getoperators().end(); it1++)
+        {
+            if (it1->second == client)
+                this->getoperators().erase(it1);
+        }
     }
 
     return (0);
