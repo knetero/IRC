@@ -171,7 +171,7 @@ void Server::parse_commands(Client *client, std::string& data)
     else if (parameters[0] == "BOT")
         bot(client);
     else
-        sendData(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, data));
+        sendData(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, parameters[0]));
 }
 
 Server::~Server()
