@@ -9,14 +9,14 @@ int Server::check_properties(Channel *channel, std::string mdp, Client *client)
     if (channel->getmodes().find("k") != std::string::npos) {
         if (channel->getpassword().compare(mdp) != 0 || mdp.empty())
         {
-            sendData(client->clientSocket, ERR_BADCHANNELKEY(client->nickname, channel->getName()));
+            sendData(client->clientSocket, ERR_BADCHANNELKEY(client->nickname, channel->getName(), getIp(client->clientAdress)));
             return(1);
         }
     }
         if (channel->getmodes().find("l") != std::string::npos && channel->getlimit() - channel->getSize() <= 0)
         {
             std::cout << channel->getlimit() - channel->getSize() << std::endl;
-            sendData(client->clientSocket, ERR_CHANNELISFULL(client->nickname, channel->getName()));
+            sendData(client->clientSocket, ERR_CHANNELISFULL(client->nickname, channel->getName(), getIp(client->clientAdress)));
             return(1);
         }
         if(channel->getmodes().find("i") != std::string::npos )
@@ -29,7 +29,7 @@ int Server::check_properties(Channel *channel, std::string mdp, Client *client)
                 }
             if (channel->getinvited().find(client->clientSocket)->first != client->clientSocket)
             {
-                sendData(client->clientSocket, ERR_INVITEONLYCHAN(client->nickname, channel->getName()));
+                sendData(client->clientSocket, ERR_INVITEONLYCHAN(client->nickname, channel->getName(), getIp(client->clientAdress)));
                 return(1);
             }
         }
@@ -214,7 +214,6 @@ void Server::mode(std::string value, Client *client)
         if (args.empty())
         {
             sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "MODE"));
-            std::cout << "heeeellllo"<<std::endl;
             return;
         }
         else if (!args[0].empty() && args[0][0] == '#' && server_channels.find(args[0].substr(1)) != server_channels.end())
@@ -254,7 +253,7 @@ void Server::mode(std::string value, Client *client)
                     while(modes[i][j])
                     {
                         if (server_channels.find(args[0].substr(1)) == server_channels.end())
-                            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0]));
+                            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0], getIp(client->clientAdress)));
                         else if (server_channels.find(args[0].substr(1))->second->getoperators().find(client->clientSocket)->first != client->clientSocket)
                                 sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED(serverClients[client->clientSocket]->nickname, args[0]) );
                         else if(server_channels.find(args[0].substr(1)) != server_channels.end() && isalpha(modes[i][j]) && modes[i][0] == '-')
@@ -320,7 +319,7 @@ void Server::mode(std::string value, Client *client)
                                     }
                                 } 
                                 else
-                                    sendData(client->clientSocket, ERR_NOTENOUGHPARAM(serverClients[client->clientSocket]->nickname));
+                                    sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "MODE"));
 
                             }
                             else if (modes[i][j] == 'k')
@@ -343,7 +342,7 @@ void Server::mode(std::string value, Client *client)
                                         std::cout << "args[2]     "<< args[2] << " |||||| " << std::endl;
                                 }
                                 else
-                                    sendData(client->clientSocket, ERR_NOTENOUGHPARAM(serverClients[client->clientSocket]->nickname));
+                                    sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "MODE"));
                             }
                             else if (modes[i][j] == 't' || modes[i][j] == 'i')
                             {
@@ -371,7 +370,7 @@ void Server::mode(std::string value, Client *client)
                             {
                                 std::cout<<get_nick(args[0], args[2])<< "   777"<< args[2]<<"77"<< getClientFd(args[2])<< " jjj "<< args[2]<<std::endl;
                                 if (args.size() < 3)
-                                    sendData(client->clientSocket, ERR_NOTENOUGHPARAM(serverClients[client->clientSocket]->nickname));
+                                    sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "MODE"));
                                 else
                                 {
                                     if(getClientFd(args[2]) == -1)
@@ -410,7 +409,7 @@ void Server::mode(std::string value, Client *client)
         else
         {
             // std::cout << "error channel doesnt exist "<< args[0]<< std::endl;
-            sendData(client->clientSocket,ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0]));
+            sendData(client->clientSocket,ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0], getIp(client->clientAdress)));
             return;
         }
     return;

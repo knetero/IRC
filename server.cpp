@@ -32,41 +32,31 @@ Server::Server(int port, const std::string& password)
 
 bool Server::initialize()
 {
-    // Create a socket
-    // AF_INET means we are using IPv4
-    // SOCK_STREAM means we are using a TCP connection
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
         std::cerr << "Failed to create a socket. errno: " << std::endl;
         return false;
     }
-    // declare the struct for the server address
-    //struct sockaddr_in serverAddress; // struct that holds the server address
     struct sockaddr_in serverAddress1;
-    serverAddress1.sin_family = AF_INET; // means we are using IPv4
-    serverAddress1.sin_addr.s_addr = INADDR_ANY; // means we will accept connections from any IP address
-    serverAddress1.sin_port = htons(port); // means we will accept connections on this port
-
-    //set the socket to reuse the address
-    // SO_REUSEADDR means that the port can be reused immediately after the socket is closed
-    // SOL_SOCKET is the level of the socket
+    serverAddress1.sin_family = AF_INET; 
+    serverAddress1.sin_addr.s_addr = INADDR_ANY; 
+    serverAddress1.sin_port = htons(port); 
     int enable = 1;
     if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1) { //
         perror("setsockopt");
         exit(1);
     }
-    // set the socket to non-blocking mode
-    if(fcntl(serverSocket, F_SETFL, O_NONBLOCK) < 0) { // F_SETFL means set file status flags
+    if(fcntl(serverSocket, F_SETFL, O_NONBLOCK) < 0)
+    { 
         perror("fcntl");
         exit(1);
     }
-    // Bind the socket to the IP address and port
     if (bind(serverSocket, (struct sockaddr*)&serverAddress1, sizeof(serverAddress1)) == -1) { 
         std::cerr << "Failed to bind to port " << port << ". errno: " << std::endl;
         return false;
     }
-    // Mark the socket for listening in
-    if (listen(serverSocket, 5) == -1) { // 5 is the maximum length to which the queue of pending connections for serverSocket may grow
+    if (listen(serverSocket, 5) == -1)
+    {
         std::cerr << "Failed to listen on socket. errno: " << std::endl;
         return false;
     }
@@ -84,7 +74,6 @@ void Server::run_server(void)
 
     while(true)
     {
-        //
         int pollCount = poll(this->clientSockets.data(), this->clientSockets.size(), -1);
         if (pollCount == -1)
         {
@@ -95,10 +84,8 @@ void Server::run_server(void)
         {
             if (this->clientSockets[i].revents & POLLIN)
             {
-                // Checks if the file descriptor is the server socket. If so, it call AcceptNewClient() to accept a new client connection
                 if(this->clientSockets[i].fd == this->serverSocket)
                     acceptClient();
-                // Otherwise, it calls ReceiveNewData() to receive new data from a registered client
                 else
                     ReceiveData(i);
             }
@@ -108,16 +95,14 @@ void Server::run_server(void)
 
 void Server::acceptClient() 
 {
-    struct sockaddr_in clientAddress; // struct that holds the client address
-    socklen_t clientAddressLength = sizeof(clientAddress); // size of the client address struct 
-    this->clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength); // accept a connection on a socket
+    struct sockaddr_in clientAddress; 
+    socklen_t clientAddressLength = sizeof(clientAddress); 
+    this->clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
     this->clientAdress = clientAddress;
-
     if (clientSocket == -1) 
     {
         std::cerr << "Failed to accept client connection. errno: " << std::endl;
     }
-    // Set the socket to non-blocking mode
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
         std::cerr << "Failed to set client socket to non-blocking mode." << std::endl;
         close(clientSocket);
@@ -182,13 +167,9 @@ void Server::parse_commands(Client *client, std::string& data)
     else if (parameters[0] == "JOIN")
         join(data.substr(4), client);
     else if (parameters[0] == "MODE")
-    {
         mode(data.substr(4), client);
-    }
     else if (parameters[0] == "BOT")
         bot(client);
-        // else if (upcommand == "PONG")
-        //     return ;
     else
         sendData(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, data));
 }

@@ -6,6 +6,7 @@ void    Server::inviteCommand(Client *client, std::vector<std::string> &paramete
     {
         if (parameters.size() == 3)
         {
+            std::cout << server_channels.size() << std::endl;
             if (channelExist(parameters[2]) == 1)
             {
                 Channel *channel = server_channels[parameters[2].substr(1)];
@@ -15,11 +16,16 @@ void    Server::inviteCommand(Client *client, std::vector<std::string> &paramete
                     {
                         if (channel->clientExist(parameters[1]) != 1)
                         {
-                            Client *toInvite = this->serverClients[getClientFd(parameters[2])];
-                            channel->add_user(toInvite, -1);
-                            sendData(client->clientSocket, RPL_INVITING(client->nickname, parameters[1], parameters[2]));
-                            sendData(getClientFd(parameters[1]),\
-                            INVITE(client->nickname, client->username, getIp(client->clientAdress), parameters[1], parameters[2]));
+                            if (getClientFd(parameters[1]) != -1)
+                            {
+                                Client *toInvite = this->serverClients[getClientFd(parameters[1])];
+                                channel->add_user(toInvite, -1);
+                                sendData(client->clientSocket, RPL_INVITING(client->nickname, parameters[1], parameters[2]));
+                                sendData(getClientFd(parameters[1]),\
+                                INVITE(client->nickname, client->username, getIp(client->clientAdress), parameters[1], parameters[2]));
+                            }
+                            else
+                                sendData(client->clientSocket, ERR_NOSUCHNICK(client->nickname, parameters[1]));
                         }
                         else
                             sendData(client->clientSocket, ERR_USERONCHANNEL(client->nickname, parameters[1], parameters[3]));
@@ -31,13 +37,11 @@ void    Server::inviteCommand(Client *client, std::vector<std::string> &paramete
                     sendData(client->clientSocket, ERR_NOTONCHANNEL(client->nickname, parameters[2]));
             }
             else
-                sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[2]));
+                sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[2], getIp(client->clientAdress)));
         }
         else
-            sendData(client->clientSocket, ERR_NOTENOUGHPARAM(client->nickname));
+            sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "INVITE"));
     }
     else
         sendData(client->clientSocket, ERR_NOTREGISTERED(client->nickname));
 }
-
-//    channel->add_user(client, client->clientSocket, -1); in place of client->clientSocket you should get the socket of the second param after the invite command not addd the command owner to the invite list

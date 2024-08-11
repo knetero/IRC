@@ -11,8 +11,6 @@ std::vector<std::string> split_(std::string string, char delimiter)
     return splitted;
 }
 
-
-
 void Server::broadcastToChannel(Channel &channel, Client *kicker, std::string target, std::string comment)
 {
     std::map<int, Client *> channelMembers = channel.getmembers();
@@ -30,12 +28,12 @@ void Server::kickCommand(Client *client, std::vector <std::string> &parameters)
     {
         if (parameters.size() < 4)
         {
-            sendData(client->clientSocket, ERR_NOTENOUGHPARAM(client->nickname));
+            sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "KICK"));
             return ;
         }
         else if (parameters.size() > 4 && parameters[3][0] != ':')
         {
-            sendData(client->clientSocket, ERR_NOTENOUGHPARAM(client->nickname));
+            sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "KICK"));   
             return ;
         }
         std::string comment = "";
@@ -46,7 +44,7 @@ void Server::kickCommand(Client *client, std::vector <std::string> &parameters)
         // check the channel exist;
         if (channelExist(parameters[1]) == -1)
         {
-            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[1]));
+            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[1], getIp(client->clientAdress)));
             return ;
         }
         

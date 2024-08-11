@@ -13,7 +13,7 @@ void Server::userCommand(Client *client, std::vector<std::string> &parameters)
             }
             if (parameters.size() < 5)
             {
-                sendData(client->get_client_socket(), ERR_NOTENOUGHPARAM(client->nickname));
+                sendData(client->get_client_socket(), ERR_NEEDMOREPARAMS(client->nickname, "USER"));
                 return ;
             }
             client->username = parameters[1];
@@ -31,5 +31,5 @@ void Server::userCommand(Client *client, std::vector<std::string> &parameters)
         }
     }
     else
-        sendData(client->get_client_socket(), ERR_NOTENOUGHPARAM(client->nickname));
+        sendData(client->get_client_socket(), ERR_NEEDMOREPARAMS(client->nickname, "USER"));
 }

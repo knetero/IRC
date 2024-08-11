@@ -45,7 +45,7 @@ void Server::privmsgCommand(Client *client, std::vector<std::string> &parameters
             }
         }
         else
-            sendData(client->get_client_socket(), ERR_NOTENOUGHPARAM(client->nickname));
+            sendData(client->get_client_socket(), ERR_NEEDMOREPARAMS(client->nickname, "PRIVMSG"));
     }
     else
     {

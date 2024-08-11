@@ -53,8 +53,10 @@ void Server::topicCommand(Client *client, std::vector<std::string> &parameters)
                     sendData(client->clientSocket, ERR_NOTONCHANNEL(client->nickname, parameters[1]));
             }
             else
-                sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[1]));
+                sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[1], getIp(client->clientAdress)));
         }
+        else
+            sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "TOPIC"));
     }
     else
         sendData(client->clientSocket, ERR_NOTREGISTERED(client->nickname));
