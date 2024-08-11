@@ -30,23 +30,14 @@ void Server::topicCommand(Client *client, std::vector<std::string> &parameters)
                     }
                     else if (parameters.size() == 3) // modify topic
                     {
-                        if (channel->protectedTopic)
-                        {
-                            if (channel->getoperators()[client->clientSocket] == client)
-                            {
-                                channel->gettopic() = parameters[2];
-                                channel->hasTopic = true;
-                                broadcastTopic(channel, client, parameters[2]);
-                            }
-                            else
-                                sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED(client->nickname, parameters[1]));
-                        }
-                        else
+                        if ((channel->protectedTopic && channel->getoperators()[client->clientSocket] == client) || !channel->protectedTopic)
                         {
                             channel->gettopic() = parameters[2];
                             channel->hasTopic = true;
                             broadcastTopic(channel, client, parameters[2]);
                         }
+                        else
+                            sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED(client->nickname, parameters[1]));
                     }
                 }
                 else

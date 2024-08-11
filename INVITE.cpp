@@ -28,7 +28,7 @@ void    Server::inviteCommand(Client *client, std::vector<std::string> &paramete
                                 sendData(client->clientSocket, ERR_NOSUCHNICK(client->nickname, parameters[1]));
                         }
                         else
-                            sendData(client->clientSocket, ERR_USERONCHANNEL(client->nickname, parameters[1], parameters[3]));
+                            sendData(client->clientSocket, ERR_USERONCHANNEL(client->nickname, parameters[1], parameters[2]));
                     }
                     else
                         sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED(client->nickname, parameters[2]));
