@@ -105,3 +105,10 @@ std::string Server::to_str(size_t value)
     os << value ;
     return os.str() ;
 }
+
+std::string Server::getHostName()
+{
+    char hostname[255];
+    gethostname(hostname, sizeof(hostname));
+    return (hostname);
+}

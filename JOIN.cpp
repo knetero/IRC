@@ -288,9 +288,9 @@ void Server::mode(std::string value, Client *client)
                                     modeargs.append(args[2]);
                                 }
                                 else if (modes[i][j] == 'o' && args.size() >= 3 && getClientFd(args[2]) == -1)
-                                    sendData(client->clientSocket, ER_NOSUCHNICK(serverClients[client->clientSocket]->nickname , serverClients[client->clientSocket]->username, getIp(client->clientAdress), args[2]));
+                                    sendData(client->clientSocket, ERR_NOSUCHNICK(serverClients[client->clientSocket]->nickname, args[2]));
                                 else if (modes[i][j] == 'o' && args.size() >= 3 && get_nick(args[0], args[2]) == -1)
-                                    sendData(client->clientSocket, ERR_NOSUCHMEMBR(serverClients[client->clientSocket]->nickname , serverClients[client->clientSocket]->username, getIp(client->clientAdress), args[0]));
+                                    sendData(client->clientSocket, ERR_USERNOTINCHANNEL(serverClients[client->clientSocket]->nickname ,args[2] , args[0]));
                             }
                         }
                         else if (server_channels.find(args[0].substr(1)) != server_channels.end() && modes[i][0] == '+' && server_channels.find(args[0].substr(1))->second->getoperators().find(client->clientSocket)->first == client->clientSocket && isalpha(modes[i][j])) 
@@ -374,7 +374,7 @@ void Server::mode(std::string value, Client *client)
                                 else
                                 {
                                     if(getClientFd(args[2]) == -1)
-                                        sendData(client->clientSocket, ER_NOSUCHNICK(serverClients[client->clientSocket]->nickname , serverClients[client->clientSocket]->username, getIp(client->clientAdress), args[2]));
+                                        sendData(client->clientSocket, ERR_NOSUCHNICK(serverClients[client->clientSocket]->nickname ,args[2]));
                                     else if (get_nick(args[0], args[2]) != -1)
                                     {
                                         std::cout << server_channels.find(args[0].substr(1))->second->getmembers().find(get_nick(args[0], args[2]))->first  << " **  "<< std::endl;
@@ -386,7 +386,7 @@ void Server::mode(std::string value, Client *client)
                                             server_channels.find(args[0].substr(1))->second->add_user(serverClients[get_nick(args[0], args[2])] ,1 );
                                     }  
                                     else
-                                        sendData(client->clientSocket, ERR_NOSUCHMEMBR(serverClients[client->clientSocket]->nickname , serverClients[client->clientSocket]->username, getIp(client->clientAdress), args[0]));
+                                        sendData(client->clientSocket, ERR_USERNOTINCHANNEL(serverClients[client->clientSocket]->nickname, args[2], args[0]));
                                 }
                             }
                             
