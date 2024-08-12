@@ -1,6 +1,5 @@
 #include "server.hpp"
 
-
 void Server::broadcastTopic(Channel *channel, Client *client, std::string topic)
 {
     std::map<int, Client *>::iterator it;
@@ -24,7 +23,10 @@ void Server::topicCommand(Client *client, std::vector<std::string> &parameters)
                     if (parameters.size() == 2) // view the topic
                     {
                         if (channel->hasTopic)
+                        {
                             sendData(client->clientSocket, RPL_TOPIC(client->nickname, parameters[1], channel->gettopic()));
+                            sendData(client->clientSocket, RPL_TOPICWHOTIME(client->nickname, parameters[1], channel->topicChanger->nickname, channel->topicChanger->username, getIp(channel->topicChanger->clientAdress), channel->timestap));
+                        }
                         else
                             sendData(client->clientSocket, RPL_NOTOPIC(client->nickname, parameters[1]));
                     }
@@ -34,6 +36,9 @@ void Server::topicCommand(Client *client, std::vector<std::string> &parameters)
                         {
                             channel->gettopic() = parameters[2];
                             channel->hasTopic = true;
+                            time_t timestap = time(NULL);
+                            channel->timestap = to_str(timestap);
+                            channel->topicChanger = client;
                             broadcastTopic(channel, client, parameters[2]);
                         }
                         else

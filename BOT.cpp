@@ -81,7 +81,7 @@ void Server::bot(Client *client)
             {
                 sendData(client->clientSocket, "Finished\n");
                 sendData(client->clientSocket, "Your result: ");
-                sendData(client->clientSocket, to_string(client->totalXps) + "Xps.");
+                sendData(client->clientSocket, this->to_str(client->totalXps) + "Xps.");
                 return ;
             }
             else if (started)
@@ -93,7 +93,7 @@ void Server::bot(Client *client)
                     {
                         sendData(client->clientSocket, "You answerd all the questions\n");
                         sendData(client->clientSocket, "Your result: ");
-                        sendData(client->clientSocket, to_string(client->totalXps) + "Xps.");
+                        sendData(client->clientSocket, to_str(client->totalXps) + "Xps.");
                         return ;
                     }
                     questionGenerated = true;

@@ -48,7 +48,8 @@
 #define ERR_CANNOTSENDTOCHAN(p1, p2) " 404 " + p1 + " " + p2 + " :Cannot send to channel\r\n"
 #define RPL_INVITING(client, nick, channel) ":1337.ma 341 " + client + " " + nick + " " + channel + "\r\n"
 #define RPL_TOPIC(client, channel, topic) ":332 " + client + " " + channel + " " + topic + "\r\n"
-#define RPL_TTOPIC(client,username, channel,adress, topic)  ":" + client + "!" + username + "@" + adress + " TOPIC " + channel + " :" + topic +"\r\n" 
+#define RPL_TOPICWHOTIME(client, channel, nick, username, adress, setat) ":1337.ma 333 " + client + " " + channel + " " + nick + "!" + username + "@" + adress + " " + setat + "\r\n"
+#define RPL_TTOPIC(client,username, channel,adress, topic)  ":" + client + "!" + username + "@" + adress + " TOPIC " + channel + " :" + topic +"\r\n"
 #define RPL_NOTOPIC(client, channel) ":331 " + client + " " + channel + " No topic is set\r\n" 
 #define ER_NOSUCHNICK(nickname , username, adress, channelname) ":" + nickname + "!" + username + "@" + adress +" 401 " + nickname + " " +channelname +" :No such nick" + CRLF
 #define ERR_NOSUCHMEMBR(nickname , username, adress, channelname) ":" + nickname + "!" + username + "@" + adress +" 441 " + nickname + " " +channelname +" :They aren't on that channel" + CRLF

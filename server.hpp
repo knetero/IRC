@@ -100,8 +100,7 @@ class Server {
         void parseQuestionsFile();
         int isCorrectAnswer(std::string question, std::string answer);
         std::string generateQuestion(std::vector<std::string> &answerdQuestions);
-        std::string to_string(size_t value);
-
+        std::string to_str(size_t value);
         // Commands
         void                        passCommand(Client *client, std::vector<std::string> &parameters);
         void                        nickCommand(Client *client, std::vector<std::string> &parameters);

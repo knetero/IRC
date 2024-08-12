@@ -26,6 +26,8 @@ class Channel {
 
         // Constructeur de la classe Channel
     public:
+        Client *topicChanger;
+        std::string timestap;
         int limit;
         bool hasTopic;
         bool protectedTopic;
