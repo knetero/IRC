@@ -253,7 +253,7 @@ void Server::mode(std::string value, Client *client)
                     while(modes[i][j])
                     {
                         if (server_channels.find(args[0].substr(1)) == server_channels.end())
-                            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0], getIp(client->clientAdress)));
+                            sendData(client->clientSocket, ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0]));
                         else if (server_channels.find(args[0].substr(1))->second->getoperators().find(client->clientSocket)->first != client->clientSocket)
                                 sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED(serverClients[client->clientSocket]->nickname, args[0]) );
                         else if(server_channels.find(args[0].substr(1)) != server_channels.end() && isalpha(modes[i][j]) && modes[i][0] == '-')
@@ -409,7 +409,7 @@ void Server::mode(std::string value, Client *client)
         else
         {
             // std::cout << "error channel doesnt exist "<< args[0]<< std::endl;
-            sendData(client->clientSocket,ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0], getIp(client->clientAdress)));
+            sendData(client->clientSocket,ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0]));
             return;
         }
     return;

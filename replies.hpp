@@ -12,6 +12,7 @@
 #define KICK(p1, p2, p3, p4, p5, p6) ":" + p1 + "!~" + p2 + "@" + p3 + " KICK " + p4 + " " + p5 + " :" + p6 + "\r\n"
 #define INVITE(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " INVITE " + p4 + " " + p5 + "\r\n"
 #define TOPIC(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " TOPIC " + p4 + " :" + p5 + "\r\n"
+#define PART(nickname, username, adress, channel, messgae) ":" + nickname + "!~" + username + "@" + adress + " PART " + channel + " " + message + "\r\n"
 
 #define RPL_CHANNELMODEIS(nickname, channelname, modestring) (":"+ nickname + " MODE #" + channelname +  " +" + modestring + CRLF)
 #define RPL_SENDMODEIS(nickname, channelname, modestring, sign , arg) ( nickname + " MODE " + channelname +  " : " + sign +  modestring + arg + CRLF)
@@ -28,8 +29,8 @@
 #define RPL_NAMREPLY(adress,nickname, channelname, names )                  (HOSTNAME + " 353 " + nickname + " = #" + channelname  +" :"+names+"\r\n")
 #define RPL_ENDOFNAMES(adress, nickname, channelname )                      (HOSTNAME + " 366 " + nickname  + " #" + channelname + " :End of /NAMES list." +"\r\n")
 #define RPL_NICKCHANGE(oldnickname, nickname) (oldnickname + " changed his nickname to " + nickname + "."+ CRLF)
-#define ERR_NOSUCHNICK(client, nick)                                        HOSTNAME + " 401 " + client + " " + nick + " :No such nick/channel" + CRLF )
-#define ERR_NOSUCHCHANNEL(nickname, channelname,  adress)                   HOSTNAME + " 403 " + nickname + " " + channelname +  " :No such channel" + CRLF)
+#define ERR_NOSUCHNICK(client, nick)                                        HOSTNAME + " 401 " + client + " " + nick + " :No such nick/channel" + CRLF 
+#define ERR_NOSUCHCHANNEL(client, channel)                                  HOSTNAME + " 403 " + client + " " + channel +  " :No such channel" + CRLF
 #define ERR_CANNOTSENDTOCHAN(p1, p2)                                        HOSTNAME + " 404 " + p1 + " " + p2 + " :Cannot send to channel\r\n"
 #define ERR_NOTEXTTOSEND(nickname)                                          (HOSTNAME + " 412 " + nickname + " :No text to send" + CRLF)
 #define ERR_CMDNOTFOUND(nickname, command)                                  (HOSTNAME + " 421 " + nickname + " " + command + " :Unknown command" + CRLF)
@@ -37,7 +38,7 @@
 #define ERR_ERRONEUSNICKNAME(nickname)                                      (HOSTNAME + " 432 " + nickname + " :Erroneus nickname" + CRLF)
 #define ERR_NICKINUSE(nickname)                                             (HOSTNAME + " 433 " + nickname + " :Nickname is already in use" + CRLF)
 #define ERR_USERNOTINCHANNEL(client, nick, channel)                         HOSTNAME + " 441 " + client + " " + nick + " " + channel + " :They aren't on that channel\r\n"
-#define ERR_NOTONCHANNEL(p1, p2)                                            HOSTNAME + " 442 " + p1 + " " + p2 + " " + ": You're not on that channel\r\n"
+#define ERR_NOTONCHANNEL(client, channel)                                   HOSTNAME + " 442 " + client + " " + channel + " " + ": You're not on that channel\r\n"
 #define ERR_USERONCHANNEL(client, nick, channel)                            HOSTNAME + " 443 " + client + " " + nick + " " + channel + " :is already on channel\r\n"
 #define ERR_NOTREGISTERED(nickname)                                         (HOSTNAME + " 451 " + nickname + " :You have not registered!" + CRLF)
 #define ERR_NEEDMOREPARAMS(client, command)                                 (HOSTNAME + " 461 " + client + " " + command + " :Not enough parameters." + CRLF)

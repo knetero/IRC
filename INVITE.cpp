@@ -37,7 +37,7 @@ void    Server::inviteCommand(Client *client, std::vector<std::string> &paramete
                     sendData(client->clientSocket, ERR_NOTONCHANNEL(client->nickname, parameters[2]));
             }
             else
-                sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[2], getIp(client->clientAdress)));
+                sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[2]));
         }
         else
             sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "INVITE"));

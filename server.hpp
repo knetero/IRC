@@ -90,11 +90,12 @@ class Server {
         void                        broadcastToChannel(Channel &channel, Client *kicker, std::string target, std::string comment);
         void                        getDate(char **buf);
         std::vector<std::string>    splitParameters(std::string parametersString);
-        void send_info(Channel &chName, std::string msg);
-        int channelExist(std::string channelName);
-        void broadcastTopic(Channel *channel, Client *client, std::string topic);
-        void send_info(Channel *chName, std::string msg);
-
+        void                        send_info(Channel &chName, std::string msg);
+        int                         channelExist(std::string channelName);
+        void                        broadcastTopic(Channel *channel, Client *client, std::string topic);
+        void                        send_info(Channel *chName, std::string msg);
+        void                        broadcastPart(Client *client, Channel *channel, std::string message);
+        void                        removeChannel(Channel *channel);
 
         void bot(Client *client);
         void parseQuestionsFile();
@@ -113,6 +114,7 @@ class Server {
         void                        topicCommand(Client *client, std::vector<std::string> &parameters);
         void                        join(std::string value, Client *client);
         void                        mode(std::string value, Client *client);
+        void                        part(Client *client, std::vector<std::string> &parameters);
         //
 };
 

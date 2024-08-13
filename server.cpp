@@ -130,9 +130,9 @@ void Server::ReceiveData(size_t i)
     if(bytesRead == 0)
     {
         std::cout << RED << "[-] Client disconnected, client fd: " << RESET << clientSockets[i].fd << std::endl;
+        close(clientSockets[i].fd);
         serverClients.erase(serverClients.find(clientSockets[i].fd));
         clientSockets.erase(clientSockets.begin() + i);
-        close(clientSockets[i].fd);
         return;
     }
     Client *client = serverClients[clientSockets[i].fd];
@@ -170,6 +170,10 @@ void Server::parse_commands(Client *client, std::string& data)
         mode(data.substr(4), client);
     else if (parameters[0] == "BOT")
         bot(client);
+    else if (parameters[0] == "PONG")
+        return ;
+    else if (parameters[0] == "PART")
+        part(client, parameters);
     else
         sendData(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, parameters[0]));
 }

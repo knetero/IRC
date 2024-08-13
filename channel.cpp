@@ -212,6 +212,7 @@ int Channel::removeUser(Client *client)
         if (it->second == client)
         {
             this->getmembers().erase(it);
+            break ;
         }
     }
 
@@ -219,15 +220,20 @@ int Channel::removeUser(Client *client)
     for (it1 = this->getoperators().begin(); it1 != this->getoperators().begin(); it1++)
     {
         if (it1->second == client)
+        {
             this->getoperators().erase(it1);
+            break ;
+        }
     }
 
     std::map<int, Client *>::iterator it2;
     for (it2 = this->getinvited().begin(); it2 != this->getinvited().end(); it2++)
     {
         if (it2->second == client)
+        {
             this->getinvited().erase(it2);
+            break ;
+        }
     }
-
     return (0);
 }

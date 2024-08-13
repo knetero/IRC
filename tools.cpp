@@ -112,3 +112,16 @@ std::string Server::getHostName()
     gethostname(hostname, sizeof(hostname));
     return (hostname);
 }
+
+void    Server::removeChannel(Channel *channel)
+{
+    std::map<std::string, Channel *>::iterator it;
+    for (it = this->server_channels.begin(); it != this->server_channels.end(); it++)
+    {
+        if (it->second == channel)
+        {
+            server_channels.erase(it);
+            break ;
+        }
+    }
+}
