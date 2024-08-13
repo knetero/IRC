@@ -56,6 +56,7 @@ class Channel {
         std::string getMemberNames();
         int clientExist(std::string name);
         Channel(void);
+        void removeOperator(Client *client);
         ~Channel(){std::cout << "channel destructor" << std::endl;}
 
 };

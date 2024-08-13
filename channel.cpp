@@ -132,10 +132,13 @@ void Channel::add_user(Client * c, int type)
     if (type == 0 && members.find(c->clientSocket) == members.end())
     {
         members.insert(std::make_pair(c->clientSocket, c));
+        std::cout<< "opr"<<std::endl;
     }
     else if(type == 1 && operators.find(c->clientSocket) == operators.end())
     {
         operators.insert(std::make_pair(c->clientSocket, c));
+        std::cout<< "memb"<<std::endl;
+
     }
     else if(type == -1 && invited_clients.find(c->clientSocket) == invited_clients.end())
     {
@@ -207,7 +210,7 @@ int Channel::clientExist(std::string name)
 int Channel::removeUser(Client *client)
 {
     std::map<int, Client *>::iterator it;
-    for (it = this->getmembers().begin(); it != this->getmembers().end(); it++)
+    for (it = this->getmembers().begin(); it != this->getmembers().end() ; ++it)
     {
         if (it->second == client)
         {
@@ -217,7 +220,7 @@ int Channel::removeUser(Client *client)
     }
 
     std::map<int, Client *>::iterator it1;
-    for (it1 = this->getoperators().begin(); it1 != this->getoperators().begin(); it1++)
+    for (it1 = this->getoperators().begin(); it1 != this->getoperators().end(); ++it1)
     {
         if (it1->second == client)
         {
@@ -227,7 +230,7 @@ int Channel::removeUser(Client *client)
     }
 
     std::map<int, Client *>::iterator it2;
-    for (it2 = this->getinvited().begin(); it2 != this->getinvited().end(); it2++)
+    for (it2 = this->getinvited().begin(); it2 != this->getinvited().end(); ++it2)
     {
         if (it2->second == client)
         {
@@ -237,3 +240,20 @@ int Channel::removeUser(Client *client)
     }
     return (0);
 }
+
+void Channel::removeOperator(Client *client)
+{
+        std::map<int, Client *>::iterator it1;
+        std::cout<< "erase"<< std::endl;
+        for (it1 = this->getoperators().begin(); it1 != this->getoperators().end(); ++it1)
+        {
+            if (it1->first == client->get_client_socket())
+            {
+                this->getoperators().erase(it1);
+                break ;
+            }
+        }
+        std::cout<< "end erase"<< std::endl;
+
+}
+
