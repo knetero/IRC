@@ -11,6 +11,11 @@ void Server::passCommand(Client *client, std::vector<std::string> &parameters)
         if (parameters[1] == this->password)
         {
             client->passSet = true;
+            if (client->nickSet && client->userSet)
+            {
+                client->isRegistered = true;
+                welcomeMessage(client);
+            }
         }
         else
             sendData(client->get_client_socket(), ERR_PASSWDMISMATCH(client->nickname));

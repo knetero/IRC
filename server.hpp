@@ -79,7 +79,7 @@ class Server {
         void check_user(int clientSocket, const std::string&data , std::map<int, Client>& clients_Map, Client& client);
         bool check_Nick(int clientSocket, std::string value,  std::map<int, Client>& clients_Map);
     
-        void                        welcomeMessage(int fd, Client *client);
+        void                        welcomeMessage(Client *client);
         int                         get_nick(std::string chName, std::string nickname);
         int                         check_properties(Channel *channel, std::string mdp, Client *client);
         void                        sendData(int fd, std::string data);

@@ -29,11 +29,11 @@ void Server::getDate(char **buf)
 	}
 }
 
-void Server::welcomeMessage(int fd, Client *client)
+void Server::welcomeMessage(Client *client)
 {
-    sendData(fd, RPL_WELCOME(client->nickname, client->username, getIp(client->clientAdress)));
-    sendData(fd, RPL_YOURHOST(client->nickname, getIp(client->clientAdress)));
-    sendData(fd, RPL_CREATED(client->nickname, this->startdate));
+    sendData(client->clientSocket, RPL_WELCOME(client->nickname, client->username, getIp(client->clientAdress)));
+    sendData(client->clientSocket, RPL_YOURHOST(client->nickname, getIp(client->clientAdress)));
+    sendData(client->clientSocket, RPL_CREATED(client->nickname, this->startdate));
 }
 
 std::vector<std::string> Server::splitParameters(std::string parametersString)

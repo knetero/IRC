@@ -37,8 +37,6 @@ void Server::nickCommand(Client *client, std::vector<std::string> &parameters)
 {
     if (parameters.size() == 2)
     {
-        if (client->passSet)
-        {
             if (nickAlreadyInUse(parameters[1], serverClients, client->get_client_socket())) // check if the username is already used.
                 sendData(client->get_client_socket(), ERR_NICKINUSE(parameters[1]));
             else if (client->nickname == parameters[1]) // check if it is already my nickname
@@ -57,17 +55,13 @@ void Server::nickCommand(Client *client, std::vector<std::string> &parameters)
             {
                 client->nickname = parameters[1];
                 client->nickSet = true;
-                if (client->nickSet && client->userSet)
+                if (client->passSet && client->userSet)
                 {
                     client->isRegistered = true;
-                    welcomeMessage(client->get_client_socket(), client);
+                    welcomeMessage(client);
                 }
             }
-        }
-        else
-        {
-            sendData(client->get_client_socket(), ERROR(std::string("access denied: bad password")));
-        }
+        
     }
     else
         sendData(client->get_client_socket(), ERR_NONICKNAMEGIVEN);
