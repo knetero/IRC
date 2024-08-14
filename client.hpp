@@ -24,7 +24,7 @@ class Client {
         bool                nickSet;
         bool                userSet;
         bool                isRegistered;
-        std::vector<Channel> joinedChannels;
+        std::vector<Channel *> joinedChannels;
         std::vector<std::string> answerdQuestions;
         size_t              totalXps;
         Client();

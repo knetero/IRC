@@ -7,8 +7,8 @@ bool is_int(std::string param)
     size_t index = 0;
 
     if (index < param.length() && (param[index] == '-' || param[index] == '+')) {
-        // if((param[index] = '-'))
-        //     sign = -1;
+        if((param[index] = '-'))
+            return(false);
         index++;
     }
 
@@ -19,8 +19,8 @@ bool is_int(std::string param)
             return (false);
         index++;
     }
-    // if ((sign * result) > 2147483647 || (sign * result) < -2147483648)
-	// 	return (false);
+    if (( result) > 2147483647 || (result) <= 0)
+		return (false);
     return true;
 }
 
@@ -55,6 +55,6 @@ int convert(std::string param)
 {
      if (is_int(param))
            return(cast_int(param));
-        else
-            return(-1);
+    else
+        return(-1);
 }

@@ -130,9 +130,9 @@ void Server::mode(std::string value, Client *client)
                                 {
                                     if (convert(args[2]) != -1)
                                     {
-                                            if (m == -1)
+                                        if (m == -1)
                                             modestr.append("+");
-                                            m++;
+                                        m++;
                                         modestr.append(1, modes[i][j]);
                                         modeargs.append(" "+args[2]+" ");
                                         server_channels.find(args[0].substr(1))->second->setlimit(cast_int(args[2]));

@@ -125,3 +125,23 @@ void    Server::removeChannel(Channel *channel)
         }
     }
 }
+
+void    Server::removeClientFromServer(Client *client)
+{
+    this->serverClients.erase(client->clientSocket); // remove client from the server map;
+    for (size_t i = 0; i < this->clientSockets.size(); i++) // remove client from pollfds vector
+    {
+        if (clientSockets[i].fd == client->clientSocket)
+            clientSockets.erase(clientSockets.begin() + i);
+    }
+
+    for (size_t i = 0; i < client->joinedChannels.size(); i++) // remove user from all the joined channels;
+    {
+        client->joinedChannels[i]->removeUser(client);
+        client->joinedChannels[i]->setSize(client->joinedChannels[i]->getSize() - 1);
+        if (client->joinedChannels[i]->getSize() == 0)
+            removeChannel(client->joinedChannels[i]);
+    }
+    close(client->clientSocket); // close the client fd
+    delete client;
+}

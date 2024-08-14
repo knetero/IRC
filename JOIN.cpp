@@ -52,7 +52,7 @@ void Server::join(std::string value, Client *client)
     std::string password;
     std::string p;
     std::string ch;
-    int l = 0;
+    // int l = 0;
     std::getline(iss, channels, ' ');
     std::stringstream ss(strTrim( channels , " ")); 
         password = value.substr( value.find(" ") + 1,value.size());
@@ -69,10 +69,14 @@ void Server::join(std::string value, Client *client)
             std::cout << p <<" , " << ch << std::endl;
             if(ch[0] != '#')
             {
-                l++; 
-                std::cout << "kkkk"<<std::endl;
+                if (!ch.empty())
+                    sendData(client->clientSocket, ERR_BADCHANMASK(ch)); 
                 while((getline(ss, ch, ',') && ch[0] != '#' ))
-                    l++; 
+                {
+                    if (!ch.empty())
+                        sendData(client->clientSocket, ERR_BADCHANMASK(ch));
+                    std::cout << "** "<< ch<<std::endl;
+                }
             }
             if(ch[0] == '#')
             {
@@ -84,20 +88,19 @@ void Server::join(std::string value, Client *client)
         {
             if(ch[0] != '#')
             {
-                l++; 
-                std::cout << "sss"<<std::endl;
+                if (!ch.empty())
+                    sendData(client->clientSocket, ERR_BADCHANMASK(ch)); 
                 while((getline(ss, ch, ',') && ch[0] != '#' ))
-                l++;
+                {
+                    if (!ch.empty())
+                        sendData(client->clientSocket, ERR_BADCHANMASK(ch)); 
+                    std::cout << "-- "<< ch<<std::endl;
+                }
             }
             if(ch[0] == '#')
             {
                 map_channels[ch] = "-1"; 
             }
-        }
-         while (l>0)
-        {
-            sendData(client->clientSocket, ERR_BADCHANMASK(ch));
-            l--;
         }
     std::map<std::string, std::string>::iterator it;
     std::map<std::string, std::string>::iterator element;
@@ -112,6 +115,7 @@ void Server::join(std::string value, Client *client)
                 if (element->second->getmembers().find(client->clientSocket)->first != client->clientSocket)
                 {
                     element->second->add_user(client, 0);
+                    client->joinedChannels.push_back(element->second);
                     element->second->setSize(element->second->getSize()+1);
                     msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +element->second->getName()+"\r\n";
                     send_info(element->second, msg);
@@ -141,6 +145,7 @@ void Server::join(std::string value, Client *client)
                 // member = new Client(serverClients[client->clientSocket]);
                 server_channels.find(it->first.substr(1))->second->add_user(client, 1);
                 server_channels.find(it->first.substr(1))->second->add_user(client, 0);
+                client->joinedChannels.push_back(chn);
                 chn->setSize(chn->getSize()+1);
                 msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +chn->getName()+"\r\n";
                 sendData(client->clientSocket, msg);
@@ -152,6 +157,7 @@ void Server::join(std::string value, Client *client)
                     sendData(client->clientSocket, RPL_TTOPIC(serverClients[client->clientSocket]->nickname,serverClients[client->clientSocket]->username,getIp(client->clientAdress), chn->getName(), chn->gettopic()));
         }
     }
+            
   
 }
 
@@ -160,8 +166,6 @@ void Server::join(std::string value, Client *client)
 int Server::get_nick(std::string chName, std::string nickname)
 {
       std::map<int, Client *>::iterator itt;
-    //   (void)nickname;
-    //   std::cout << "no nicknamvve" << std::endl;
             for (itt = server_channels.find(chName.substr(1))->second->getmembers().begin(); itt != server_channels.find(chName.substr(1))->second->getmembers().end(); ++itt) {
                 std::cout << itt->first << std::endl;
 
@@ -170,6 +174,5 @@ int Server::get_nick(std::string chName, std::string nickname)
                     return (itt->first);
                 }
             }
-            // std::cout << "no nickname" << std::endl;
             return (-1);
 }

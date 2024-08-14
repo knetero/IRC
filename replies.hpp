@@ -5,7 +5,7 @@
 
 #define HOSTNAME ":" + Server::getHostName()    
 #define CRLF "\r\n"
-#define ERROR(p1) "ERROR :" + p1 + "\r\n"
+// #define ERROR(p1) "ERROR :" + p1 + "\r\n"
 
 #define PRIVMSG(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " PRIVMSG " + p4 + " :" + p5 + "\r\n"
 #define NICK(p1, p2, p3, p4) ":" + p1 + "!~" + p2 + "@" + p3 + " NICK :" + p4 + "\r\n"
@@ -13,6 +13,8 @@
 #define INVITE(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " INVITE " + p4 + " " + p5 + "\r\n"
 #define TOPIC(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " TOPIC " + p4 + " :" + p5 + "\r\n"
 #define PART(nickname, username, adress, channel, messgae) ":" + nickname + "!~" + username + "@" + adress + " PART " + channel + " " + message + "\r\n"
+#define QUIT(nickname, username, adress, messgae) ":" + nickname + "!~" + username + "@" + adress + " QUIT " + " " + message + "\r\n"
+#define ERROR(reason) "ERROR :" + reason + "\r\n"
 
 #define RPL_CHANNELMODEIS(nickname, channelname, modestring) (":"+ nickname + " MODE #" + channelname +  " +" + modestring + CRLF)
 #define RPL_SENDMODEIS(nickname, channelname, modestring, sign , arg) ( nickname + " MODE " + channelname +  " : " + sign +  modestring + arg + CRLF)

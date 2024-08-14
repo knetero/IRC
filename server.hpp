@@ -96,7 +96,8 @@ class Server {
         void                        send_info(Channel *chName, std::string msg);
         void                        broadcastPart(Client *client, Channel *channel, std::string message);
         void                        removeChannel(Channel *channel);
-
+        void                        brodcastQuit(Client *client, Channel *channel, std::string &message);
+        void                        removeClientFromServer(Client *client);
         void bot(Client *client);
         void parseQuestionsFile();
         int isCorrectAnswer(std::string question, std::string answer);
@@ -115,6 +116,7 @@ class Server {
         void                        join(std::string value, Client *client);
         void                        mode(std::string value, Client *client);
         void                        part(Client *client, std::vector<std::string> &parameters);
+        void                        quit(Client *client, std::vector<std::string> &parameters);
         //
 };
 

@@ -132,13 +132,10 @@ void Channel::add_user(Client * c, int type)
     if (type == 0 && members.find(c->clientSocket) == members.end())
     {
         members.insert(std::make_pair(c->clientSocket, c));
-        std::cout<< "opr"<<std::endl;
     }
     else if(type == 1 && operators.find(c->clientSocket) == operators.end())
     {
         operators.insert(std::make_pair(c->clientSocket, c));
-        std::cout<< "memb"<<std::endl;
-
     }
     else if(type == -1 && invited_clients.find(c->clientSocket) == invited_clients.end())
     {
@@ -256,4 +253,3 @@ void Channel::removeOperator(Client *client)
         std::cout<< "end erase"<< std::endl;
 
 }
-

@@ -130,15 +130,18 @@ void Server::ReceiveData(size_t i)
     if(bytesRead == 0)
     {
         std::cout << RED << "[-] Client disconnected, client fd: " << RESET << clientSockets[i].fd << std::endl;
-        close(clientSockets[i].fd);
-        serverClients.erase(serverClients.find(clientSockets[i].fd));
-        clientSockets.erase(clientSockets.begin() + i);
+        removeClientFromServer(this->serverClients[clientSockets[i].fd]);
         return;
     }
     Client *client = serverClients[clientSockets[i].fd];
     client->buffer.append(buffer, bytesRead);
-    parse_commands(client, client->buffer);
-    client->buffer.clear();
+    size_t newlinepos;
+    while((newlinepos = client->buffer.find("\n")) != std::string::npos) 
+    {
+        std::string command = client->buffer.substr(0, newlinepos);
+        parse_commands(client, command);
+        client->buffer.erase(0, newlinepos + 2);
+    }
 }
 
 void Server::parse_commands(Client *client, std::string& data)
@@ -174,6 +177,8 @@ void Server::parse_commands(Client *client, std::string& data)
         return ;
     else if (parameters[0] == "PART")
         part(client, parameters);
+    else if (parameters[0] == "QUIT")
+        quit(client, parameters);
     else
         sendData(client->get_client_socket(), ERR_CMDNOTFOUND(client->nickname, parameters[0]));
 }

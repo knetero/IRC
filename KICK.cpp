@@ -60,6 +60,7 @@ void Server::kickCommand(Client *client, std::vector <std::string> &parameters)
                         Client *clientToKick = channel->getmembers()[getClientFd(users[i])];
                         broadcastToChannel(*channel, client, users[i], parameters[3]);
                         channel->removeUser(clientToKick); // remove user from members, operators and invited of channel
+                        channel->setSize(channel->getSize() -1 );
                     }
                     else
                         sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED2(client->nickname, parameters[1]));

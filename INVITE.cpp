@@ -12,7 +12,8 @@ void    Server::inviteCommand(Client *client, std::vector<std::string> &paramete
                 Channel *channel = server_channels[parameters[2].substr(1)];
                 if (channel->clientExist(client->nickname) == 1)
                 {
-                    if ((channel->inviteonly && channel->getoperators()[client->clientSocket] == client) || !channel->inviteonly)
+                    std::cout << "invite" << channel->inviteonly << std::endl;
+                    if ((channel->inviteonly && channel->getoperators()[client->clientSocket] == client) || channel->inviteonly == false)
                     {
                         if (channel->clientExist(parameters[1]) != 1)
                         {
