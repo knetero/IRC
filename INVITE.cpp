@@ -6,18 +6,16 @@ void    Server::inviteCommand(Client *client, std::vector<std::string> &paramete
     {
         if (parameters.size() == 3)
         {
-            std::cout << server_channels.size() << std::endl;
-            if (channelExist(parameters[2]) == 1)
+            if (getClientFd(parameters[1]) != -1)
             {
-                Channel *channel = server_channels[parameters[2].substr(1)];
-                if (channel->clientExist(client->nickname) == 1)
+                if (channelExist(parameters[2]) == 1)
                 {
-                    std::cout << "invite" << channel->inviteonly << std::endl;
-                    if ((channel->inviteonly && channel->getoperators()[client->clientSocket] == client) || channel->inviteonly == false)
+                    Channel *channel = server_channels[parameters[2].substr(1)];
+                    if (channel->clientExist(client->nickname) == 1)
                     {
-                        if (channel->clientExist(parameters[1]) != 1)
+                        if ((channel->inviteonly && channel->getoperators()[client->clientSocket] == client) || channel->inviteonly == false)
                         {
-                            if (getClientFd(parameters[1]) != -1)
+                            if (channel->clientExist(parameters[1]) != 1)
                             {
                                 Client *toInvite = this->serverClients[getClientFd(parameters[1])];
                                 channel->add_user(toInvite, -1);
@@ -26,19 +24,19 @@ void    Server::inviteCommand(Client *client, std::vector<std::string> &paramete
                                 INVITE(client->nickname, client->username, getIp(client->clientAdress), parameters[1], parameters[2]));
                             }
                             else
-                                sendData(client->clientSocket, ERR_NOSUCHNICK(client->nickname, parameters[1]));
+                                sendData(client->clientSocket, ERR_USERONCHANNEL(client->nickname, parameters[1], parameters[2]));
                         }
                         else
-                            sendData(client->clientSocket, ERR_USERONCHANNEL(client->nickname, parameters[1], parameters[2]));
+                            sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED(client->nickname, parameters[2]));
                     }
                     else
-                        sendData(client->clientSocket, ERR_CHANOPRIVSNEEDED(client->nickname, parameters[2]));
+                        sendData(client->clientSocket, ERR_NOTONCHANNEL(client->nickname, parameters[2]));
                 }
                 else
-                    sendData(client->clientSocket, ERR_NOTONCHANNEL(client->nickname, parameters[2]));
+                    sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[2]));
             }
             else
-                sendData(client->clientSocket, ERR_NOSUCHCHANNEL(client->nickname, parameters[2]));
+                sendData(client->clientSocket, ERR_NOSUCHNICK(client->nickname, parameters[1]));
         }
         else
             sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "INVITE"));

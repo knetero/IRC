@@ -26,19 +26,15 @@ void Server::kickCommand(Client *client, std::vector <std::string> &parameters)
 {
     if (client->isRegistered)
     {
-        if (parameters.size() < 4)
+        if (parameters.size() < 3)
         {
             sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "KICK"));
             return ;
         }
-        else if (parameters.size() > 4 && parameters[3][0] != ':')
-        {
-            sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "KICK"));   
-            return ;
-        }
         std::string comment = "";
-        if (parameters.size() == 4)
+        if (parameters.size() > 3)
             comment = parameters[3];
+        puts("here");
         // store users 
         std::vector<std::string> users = split_(parameters[2], ',');
         // check the channel exist;

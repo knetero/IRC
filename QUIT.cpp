@@ -14,17 +14,12 @@ void    Server::quit(Client *client, std::vector<std::string> &parameters)
 {
     // int ClientFd = client->clientSocket;
     std::string message = "";
-    int size ;
     if (parameters.size() == 2)
         message = ":Quit: " + parameters[1];
     else
         message = "Quit";
     for (size_t i = 0; i < client->joinedChannels.size(); i++)
-    {
         brodcastQuit(client, client->joinedChannels[i], message);
-        size = server_channels.find(client->joinedChannels[i]->getName())->second->getSize() - 1;
-        server_channels.find(client->joinedChannels[i]->getName())->second->setSize(size);
-    }
     sendData(client->clientSocket, QUIT(client->nickname, client->username, getIp(client->clientAdress), message));
     sendData(client->clientSocket, ERROR(std::string("Quit")));
     removeClientFromServer(client);

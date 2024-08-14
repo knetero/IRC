@@ -40,6 +40,7 @@ class Channel;
 class Server {
     public:
         Server(int port, const std::string& password);
+        ~Server();
         struct sockaddr_in serverAddress;
         struct sockaddr_in clientAdress;
         int                clientSocket;
@@ -48,7 +49,6 @@ class Server {
         char    *startdate;
         // Server(const Server& other);
         // Server& operator=(const Server& other);
-        ~Server();
 
         std::vector<struct pollfd> clientSockets;
         int serverSocket; 

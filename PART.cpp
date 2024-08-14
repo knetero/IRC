@@ -2,13 +2,13 @@
 
 void Server::broadcastPart(Client *client, Channel *channel, std::string message)
 {
-    if (!message.empty())
+    if (message.find(" ") != std::string::npos)
         message = ":" + message;
     std::map<int, Client *>::iterator it;
     for (it = channel->getmembers().begin(); it != channel->getmembers().end(); it++)
     {
         Client *c = it->second;
-        sendData(c->clientSocket, PART(client->nickname, client->username, getIp(client->clientAdress), channel->getName(), message));
+        sendData(c->clientSocket, PART(client->nickname, client->username, getIp(client->clientAdress), "#" + channel->getName(), message));
     }
 }
 

@@ -116,7 +116,7 @@ void Server::join(std::string value, Client *client)
                 {
                     element->second->add_user(client, 0);
                     client->joinedChannels.push_back(element->second);
-                    element->second->setSize(element->second->getSize()+1);
+                    element->second->setSize(element->second->getSize() + 1);
                     msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +element->second->getName()+"\r\n";
                     send_info(element->second, msg);
                     msg = ":"+getIp(client->clientAdress)+" 353 " + serverClients[client->clientSocket]->nickname + " = #" + element->second->getName()  +" :"+ element->second->getMemberNames()+"\r\n";
@@ -146,7 +146,7 @@ void Server::join(std::string value, Client *client)
                 server_channels.find(it->first.substr(1))->second->add_user(client, 1);
                 server_channels.find(it->first.substr(1))->second->add_user(client, 0);
                 client->joinedChannels.push_back(chn);
-                chn->setSize(chn->getSize()+1);
+                chn->setSize(chn->getSize() + 1);
                 msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +chn->getName()+"\r\n";
                 sendData(client->clientSocket, msg);
                 // msg = ":"+getIp(client->clientAdress)+" 353 " + serverClients[client->clientSocket]->nickname + " = #" + chn->getName()  +" :"+chn->getMemberNames()+"\r\n";

@@ -31,7 +31,7 @@
 #define RPL_NAMREPLY(adress,nickname, channelname, names )                  (HOSTNAME + " 353 " + nickname + " = #" + channelname  +" :"+names+"\r\n")
 #define RPL_ENDOFNAMES(adress, nickname, channelname )                      (HOSTNAME + " 366 " + nickname  + " #" + channelname + " :End of /NAMES list." +"\r\n")
 #define RPL_NICKCHANGE(oldnickname, nickname) (oldnickname + " changed his nickname to " + nickname + "."+ CRLF)
-#define ERR_NOSUCHNICK(client, nick)                                        HOSTNAME + " 401 " + client + " " + nick + " :No such nick/channel" + CRLF 
+#define ERR_NOSUCHNICK(client, nick)                                        HOSTNAME + " 401 " + client + " " + nick + " :No such nick" + CRLF 
 #define ERR_NOSUCHCHANNEL(client, channel)                                  HOSTNAME + " 403 " + client + " " + channel +  " :No such channel" + CRLF
 #define ERR_CANNOTSENDTOCHAN(p1, p2)                                        HOSTNAME + " 404 " + p1 + " " + p2 + " :Cannot send to channel\r\n"
 #define ERR_NOTEXTTOSEND(nickname)                                          (HOSTNAME + " 412 " + nickname + " :No text to send" + CRLF)
