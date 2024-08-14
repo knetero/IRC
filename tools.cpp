@@ -2,7 +2,7 @@
 
 std::string Server::getIp(struct sockaddr_in addr)
 {
-    return (inet_ntoa(addr.sin_addr));
+    return std::string(inet_ntoa(addr.sin_addr));
 }
 
 std::string Server::getServerIp(void)
@@ -120,6 +120,7 @@ void    Server::removeChannel(Channel *channel)
     {
         if (it->second == channel)
         {
+            delete it->second;
             server_channels.erase(it);
             break ;
         }
@@ -140,7 +141,10 @@ void    Server::removeClientFromServer(Client *client)
         client->joinedChannels[i]->removeUser(client);
         client->joinedChannels[i]->setSize(client->joinedChannels[i]->getSize() - 1);
         if (client->joinedChannels[i]->getSize() == 0)
+        {
+
             removeChannel(client->joinedChannels[i]);
+        }
     }
     close(client->clientSocket); // close the client fd
     delete client;

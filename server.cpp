@@ -185,6 +185,5 @@ void Server::parse_commands(Client *client, std::string& data)
 
 Server::~Server()
 {
-    
     delete this->startdate;
 }
