@@ -152,7 +152,6 @@ void Server::parse_commands(Client *client, std::string& data)
     if (parameters.size() == 0)
         return ;
     parameters[0] = toUpperCase(parameters[0]);
-    ////
     if (parameters[0] == "PASS")
         passCommand(client, parameters);
     else if (parameters[0] == "NICK")
