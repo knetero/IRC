@@ -11,9 +11,14 @@ int main(int ac , char** av)
         std::cerr << "Usage: " << av[0] << " <port>" << " <password>"<< std::endl;
         exit(1);
     }
-    if(!isdigit(*av[1]) || std::string(av[2]).find(" ") != std::string::npos || std::string(av[2]).length() < 1)
+    if(!isdigit(*av[1]))
     {
         std::cerr << "Invalid port number" << std::endl;
+        exit(1);
+    }
+    if(std::string(av[2]).find(" ") != std::string::npos || std::string(av[2]).length() < 1)
+    {
+        std::cerr << "Invalid password" << std::endl;
         exit(1);
     }
     Server server(atoi(av[1]), av[2]);
