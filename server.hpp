@@ -47,8 +47,6 @@ class Server {
         std::map<int , Client *>            serverClients;
         std::map<std::string, Channel *>    server_channels;
         char    *startdate;
-        // Server(const Server& other);
-        // Server& operator=(const Server& other);
 
         std::vector<struct pollfd> clientSockets;
         int serverSocket; 
