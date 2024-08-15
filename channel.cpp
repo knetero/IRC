@@ -241,7 +241,6 @@ int Channel::removeUser(Client *client)
 void Channel::removeOperator(Client *client)
 {
         std::map<int, Client *>::iterator it1;
-        std::cout<< "erase"<< std::endl;
         for (it1 = this->getoperators().begin(); it1 != this->getoperators().end(); ++it1)
         {
             if (it1->first == client->get_client_socket())
@@ -250,6 +249,5 @@ void Channel::removeOperator(Client *client)
                 break ;
             }
         }
-        std::cout<< "end erase"<< std::endl;
 
 }

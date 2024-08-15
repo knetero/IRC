@@ -39,7 +39,6 @@ void Server::mode(std::string value, Client *client)
         if (strTrim( channel , " ") != "")
         {
             args.push_back(strTrim( channel , " "));
-            std::cout<< "----"<< channel<<std::endl;
         }
     }
         if (args.empty())
@@ -49,12 +48,11 @@ void Server::mode(std::string value, Client *client)
         }
         else if (!args[0].empty() && args[0][0] == '#' && server_channels.find(args[0].substr(1)) != server_channels.end())
         {
-                std::cout << args[0]<< "waaa tfuu"<< args.size() << "  " << server_channels.find(args[0].substr(1))->first << ""<< server_channels.find(args[0].substr(1))->second->getmodes()<< std::endl;
             if (args.size() <= 1 && server_channels.find(args[0].substr(1)) != server_channels.end() )
             {
                 if( !server_channels.find(args[0].substr(1))->second->getmodes().empty())
                 {
-                    msg = ":127.0.0.1 324 " + serverClients[client->clientSocket]->nickname + " #" + server_channels.find(args[0].substr(1))->second->getName() +" +"+ server_channels.find(args[0].substr(1))->second->getmodes()+"\r\n";
+                    msg = ":"+ getIp(client->clientAdress)+" 324 " + serverClients[client->clientSocket]->nickname + " #" + server_channels.find(args[0].substr(1))->second->getName() +" +"+ server_channels.find(args[0].substr(1))->second->getmodes()+"\r\n";
                     sendData(client->clientSocket, msg);
                 }
                 else
@@ -74,7 +72,6 @@ void Server::mode(std::string value, Client *client)
 
                     s = args[1].substr(i  , j);
                     modes.push_back(s);
-                    std::cout << s<< std::endl;
                     i = i+j;
                 }
                 i = 0;
@@ -227,7 +224,6 @@ void Server::mode(std::string value, Client *client)
         }
         else
         {
-            // std::cout << "error channel doesnt exist "<< args[0]<< std::endl;
             sendData(client->clientSocket,ERR_NOSUCHCHANNEL(serverClients[client->clientSocket]->nickname, args[0]));
             return;
         }

@@ -15,18 +15,14 @@ int Server::check_properties(Channel *channel, std::string mdp, Client *client)
     }
         if (channel->getmodes().find("l") != std::string::npos && channel->getlimit() - channel->getSize() <= 0)
         {
-            std::cout << channel->getlimit() - channel->getSize() << std::endl;
+
             sendData(client->clientSocket, ERR_CHANNELISFULL(client->nickname, channel->getName(), getIp(client->clientAdress)));
             return(1);
         }
         if(channel->getmodes().find("i") != std::string::npos )
         {
-            std::cout<<channel->getinvited().find(client->clientSocket)->first << " | " << channel->getinvited().end()->first <<std::endl;
+
             std::map<int , Client *>::iterator itt;
-            for (itt =channel->getinvited().begin(); itt != channel->getinvited().end(); itt++)
-                {
-                    std::cout << itt->first << " nick name " << itt->second->nickname << std::endl;
-                }
             if (channel->getinvited().find(client->clientSocket)->first != client->clientSocket)
             {
                 sendData(client->clientSocket, ERR_INVITEONLYCHAN(client->nickname, channel->getName(), getIp(client->clientAdress)));
@@ -56,8 +52,8 @@ void Server::join(std::string value, Client *client)
     std::getline(iss, channels, ' ');
     std::stringstream ss(strTrim( channels , " ")); 
         password = value.substr( value.find(" ") + 1,value.size());
-        std::cout<< "password   |"<< password<< std::endl;
-        std::cout<< "channels   |"<< channels<< std::endl;
+
+
         std::stringstream pa(strTrim( password , " "));
     
     if (strTrim(value, " ").empty())
@@ -66,7 +62,7 @@ void Server::join(std::string value, Client *client)
     {
         while (getline(pa, p, ',') && getline(ss, ch, ',') )
         {
-            std::cout << p <<" , " << ch << std::endl;
+
             if(ch[0] != '#')
             {
                 if (!ch.empty())
@@ -75,7 +71,7 @@ void Server::join(std::string value, Client *client)
                 {
                     if (!ch.empty())
                         sendData(client->clientSocket, ERR_BADCHANMASK(ch));
-                    std::cout << "** "<< ch<<std::endl;
+
                 }
             }
             if(ch[0] == '#')
@@ -94,7 +90,7 @@ void Server::join(std::string value, Client *client)
                 {
                     if (!ch.empty())
                         sendData(client->clientSocket, ERR_BADCHANMASK(ch)); 
-                    std::cout << "-- "<< ch<<std::endl;
+
                 }
             }
             if(ch[0] == '#')
@@ -123,7 +119,7 @@ void Server::join(std::string value, Client *client)
                     sendData(client->clientSocket, msg);
                     msg = ":"+getIp(client->clientAdress)+" 366 " + serverClients[client->clientSocket]->nickname  + " #" + element->second->getName() + " :End of /NAMES list." +"\r\n";
                     sendData(client->clientSocket, msg);
-                    // sendData(client->clientSocket, RPL_CHANNELMODEIS(getIp(client->clientAdress), element->second->getName(), element->second->getmodes()));
+
                     if (!element->second->gettopic().empty())
                         sendData(client->clientSocket, RPL_TTOPIC(serverClients[client->clientSocket]->nickname,serverClients[client->clientSocket]->username,getIp(client->clientAdress), element->second->getName(), element->second->gettopic()));
                 }
@@ -142,16 +138,16 @@ void Server::join(std::string value, Client *client)
                 chn->setmodes("k");
             }
                 server_channels.insert (std::make_pair(it->first.substr(1),chn));
-                // member = new Client(serverClients[client->clientSocket]);
+
                 server_channels.find(it->first.substr(1))->second->add_user(client, 1);
                 server_channels.find(it->first.substr(1))->second->add_user(client, 0);
                 client->joinedChannels.push_back(chn);
                 chn->setSize(chn->getSize() + 1);
                 msg = ":" + serverClients[client->clientSocket]->nickname + "!" + serverClients[client->clientSocket]->username + "@" + getIp(client->clientAdress) + " JOIN " + "#" +chn->getName()+"\r\n";
                 sendData(client->clientSocket, msg);
-                // msg = ":"+getIp(client->clientAdress)+" 353 " + serverClients[client->clientSocket]->nickname + " = #" + chn->getName()  +" :"+chn->getMemberNames()+"\r\n";
+
                 sendData(client->clientSocket, RPL_NAMREPLY(getIp(client->clientAdress), serverClients[client->clientSocket]->nickname, chn->getName(), chn->getMemberNames() ));
-                // msg += ":"+getIp(client->clientAdress)+" 366 " + serverClients[client->clientSocket]->nickname  + " #" + chn->getName() + " :End of /NAMES list." +"\r\n";
+
                 sendData(client->clientSocket, RPL_ENDOFNAMES(getIp(client->clientAdress), serverClients[client->clientSocket]->nickname, chn->getName()));
                 if (!chn->gettopic().empty())
                     sendData(client->clientSocket, RPL_TTOPIC(serverClients[client->clientSocket]->nickname,serverClients[client->clientSocket]->username,getIp(client->clientAdress), chn->getName(), chn->gettopic()));
@@ -167,7 +163,7 @@ int Server::get_nick(std::string chName, std::string nickname)
 {
       std::map<int, Client *>::iterator itt;
             for (itt = server_channels.find(chName.substr(1))->second->getmembers().begin(); itt != server_channels.find(chName.substr(1))->second->getmembers().end(); ++itt) {
-                std::cout << itt->first << std::endl;
+
 
                 if (!itt->second->nickname.empty()  && itt->second->nickname  == nickname)
                 {
