@@ -8,7 +8,7 @@
 // #define ERROR(p1) "ERROR :" + p1 + "\r\n"
 
 #define PRIVMSG(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " PRIVMSG " + p4 + " :" + p5 + "\r\n"
-#define NICK(p1, p2, p3, p4) ":" + p1 + "!~" + p2 + "@" + p3 + " NICK :" + p4 + "\r\n"
+#define NICK(p1, p2, p3, p4) ":" + p1 + "!~" + p2 + "@" + p3 + " NICK " + p4 + "\r\n"
 #define KICK(p1, p2, p3, p4, p5, p6) ":" + p1 + "!~" + p2 + "@" + p3 + " KICK " + p4 + " " + p5 + " :" + p6 + "\r\n"
 #define INVITE(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " INVITE " + p4 + " " + p5 + "\r\n"
 #define TOPIC(p1, p2, p3, p4, p5) ":" + p1 + "!~" + p2 + "@" + p3 + " TOPIC " + p4 + " :" + p5 + "\r\n"
@@ -52,5 +52,6 @@
 #define ERR_BADCHANMASK(channelname)                                        (HOSTNAME + " 476 "  + channelname +" :Bad Channel Mask" +  CRLF)
 #define ERR_CHANOPRIVSNEEDED(nickname, channelname)                         (HOSTNAME + " 482 " + nickname + " " + channelname + " :You're not channel operator" + CRLF)
 #define ERR_CHANOPRIVSNEEDED2(p1, p2)                                       HOSTNAME + " 482 " + p1 + " " + p2 + " :Your privileges are too low\r\n"
+#define ERR_INVALIDMODEPARAM(client, channel, mode, modep)                  HOSTNAME + " 696 " + client + " " + channel + " " + mode + " * :Invalid mode k parameter: " + modep + "\r\n"
 
 #endif

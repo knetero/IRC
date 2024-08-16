@@ -74,7 +74,7 @@ void Server::run_server(void)
 
     while(true)
     {
-        int pollCount = poll(this->clientSockets.data(), this->clientSockets.size(), -1);
+        int pollCount = poll(&this->clientSockets[0], this->clientSockets.size(), -1);
         if (pollCount == -1)
         {
             std::cerr << "Poll failed" << std::endl;
@@ -95,20 +95,18 @@ void Server::run_server(void)
 
 void Server::acceptClient() 
 {
-    struct sockaddr_in clientAddress; 
-    socklen_t clientAddressLength = sizeof(clientAddress); 
-    this->clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
-    this->clientAdress = clientAddress;
+    socklen_t clientAddressLength = sizeof(this->clientAdress); 
+    this->clientSocket = accept(serverSocket, (struct sockaddr*)&this->clientAdress, &clientAddressLength);
     if (clientSocket == -1) 
     {
         std::cerr << "Failed to accept client connection. errno: " << std::endl;
     }
-    if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
+    if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0)
+    {
         std::cerr << "Failed to set client socket to non-blocking mode." << std::endl;
         close(clientSocket);
     }
     std::cout << GREEN << "[+] Client connected, client fd: " << RESET << clientSocket << std::endl;
-
     struct pollfd clientSocket;
     clientSocket.fd = this->clientSocket ;
     clientSocket.events = POLLIN;
@@ -169,7 +167,7 @@ void Server::parse_commands(Client *client, std::string& data)
     else if (parameters[0] == "JOIN")
         join(data.substr(4), client);
     else if (parameters[0] == "MODE")
-        mode(data.substr(4), client);
+        mode(data.substr(4), client, parameters);
     else if (parameters[0] == "BOT")
         bot(client);
     else if (parameters[0] == "PONG")

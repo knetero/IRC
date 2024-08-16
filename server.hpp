@@ -112,7 +112,7 @@ class Server {
         void                        inviteCommand(Client *client, std::vector<std::string> &parameters);
         void                        topicCommand(Client *client, std::vector<std::string> &parameters);
         void                        join(std::string value, Client *client);
-        void                        mode(std::string value, Client *client);
+        void                        mode(std::string value, Client *client, std::vector<std::string> &parameteres);
         void                        part(Client *client, std::vector<std::string> &parameters);
         void                        quit(Client *client, std::vector<std::string> &parameters);
         //

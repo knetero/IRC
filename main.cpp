@@ -16,7 +16,7 @@ int main(int ac , char** av)
         std::cerr << "Invalid port number" << std::endl;
         exit(1);
     }
-    if(std::string(av[2]).find(" ") != std::string::npos || std::string(av[2]).length() < 1)
+    if(std::string(av[2]).find(" ") != std::string::npos || std::string(av[2]).empty())
     {
         std::cerr << "Invalid password" << std::endl;
         exit(1);

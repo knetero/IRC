@@ -142,7 +142,6 @@ void    Server::removeClientFromServer(Client *client)
         client->joinedChannels[i]->setSize(client->joinedChannels[i]->getSize() - 1);
         if (client->joinedChannels[i]->getSize() == 0)
         {
-
             removeChannel(client->joinedChannels[i]);
         }
     }

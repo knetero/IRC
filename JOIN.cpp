@@ -52,9 +52,9 @@ void Server::join(std::string value, Client *client)
     std::getline(iss, channels, ' ');
     std::stringstream ss(strTrim( channels , " ")); 
         password = value.substr( value.find(" ") + 1,value.size());
-
-
-        std::stringstream pa(strTrim( password , " "));
+        if (password[0] == ':')
+            password = strTrim( password , " ").substr(1);
+    std::stringstream pa(strTrim( password , " "));
     
     if (strTrim(value, " ").empty())
         sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "JOIN"));
@@ -76,7 +76,7 @@ void Server::join(std::string value, Client *client)
             }
             if(ch[0] == '#')
             {
-                map_channels[ch] = p; 
+                map_channels[ch] = p;
             }
         }
     }
@@ -132,11 +132,11 @@ void Server::join(std::string value, Client *client)
         else {
             Channel *chn = new Channel();
             chn->setName(it->first.substr(1));
-            if (map_channels[it->first].compare("-1") != 0)
-            {
-                chn->setpassword(map_channels[it->first]);
-                chn->setmodes("k");
-            }
+            // if (map_channels[it->first].compare("-1") != 0)
+            // {
+                // chn->setpassword(map_channels[it->first]);
+                // chn->setmodes("k");
+            // }
                 server_channels.insert (std::make_pair(it->first.substr(1),chn));
 
                 server_channels.find(it->first.substr(1))->second->add_user(client, 1);

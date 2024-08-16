@@ -11,11 +11,13 @@ bool nickAlreadyInUse(std::string nickname, std::map<int, Client *>& allClients,
     return (false);
 }
 
-bool isValidNick(std::string nickname)
+bool isValidNick(std::string &nickname)
 {
-    if (nickname.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}/|-_") != std::string::npos)
+    if (nickname[0] == ':')
+        nickname = "*";
+    if (nickname.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}|-_\\") != std::string::npos)
         return (false);
-    if (!isalpha(nickname[0]))
+    if (nickname[0] == '#')
         return (false);
     return true;
 }
@@ -35,7 +37,7 @@ void Server::broadcastToChannels(std::string nickname, Client *c)
 
 void Server::nickCommand(Client *client, std::vector<std::string> &parameters)
 {
-    if (parameters.size() == 2)
+    if (parameters.size() > 1)
     {
             if (nickAlreadyInUse(parameters[1], serverClients, client->get_client_socket())) // check if the username is already used.
                 sendData(client->get_client_socket(), ERR_NICKINUSE(parameters[1]));
@@ -48,6 +50,8 @@ void Server::nickCommand(Client *client, std::vector<std::string> &parameters)
                 if (client->nickname != parameters[1]) // client wants to change the nick
                 {
                     broadcastToChannels(parameters[1], client);
+                    sendData(client->get_client_socket(),\
+                    NICK(client->nickname, client->username, getIp(client->clientAdress), parameters[1]));
                     client->nickname = parameters[1];
                 }
             }

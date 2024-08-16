@@ -57,7 +57,7 @@ class Channel {
         int clientExist(std::string name);
         Channel(void);
         void removeOperator(Client *client);
-        ~Channel(){std::cout << "channel destructor" << std::endl;}
+        ~Channel();
 
 };
 std::string UpperCaseStr(std::string s);

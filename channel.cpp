@@ -24,6 +24,11 @@ Channel::Channel(void)
     this->protectedTopic = false;
 }
 
+Channel::~Channel()
+{
+    
+}
+
 std::string strTrim( std::string s1,  std::string set) {
     size_t start = 0;
     size_t end = s1.length();

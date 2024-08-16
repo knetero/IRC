@@ -17,14 +17,13 @@ void Server::send_info(Channel *chName, std::string msg)
 
 }
 
-void Server::mode(std::string value, Client *client)
+void Server::mode(std::string value, Client *client, std::vector<std::string> &parameteres)
 {
     if (!client->isRegistered)
     {
         sendData(client->clientSocket, ERR_NOTREGISTERED(client->nickname));
         return ;
     }
-    std::istringstream iss(value);
     std::string channel;
     std::string msg;
     std::vector<std::string> args;
@@ -34,7 +33,17 @@ void Server::mode(std::string value, Client *client)
     std::string ss;
     int k = -1;
     int m = -1;
+    // std::string pass;
 
+    if (value.find(':') != std::string::npos && value.find('k') != std::string::npos)
+    {
+        // std::string pass = value.substr(value.find(':'));
+        // std::cout<< "pass    |"<<pass<< "|"<< std::endl;
+        value = value.substr(0, value.find(':'));
+        std::cout<< "value    |"<<value<< "|"<< std::endl;
+
+    }
+    std::istringstream iss(value);
     while (std::getline(iss, channel, ' ')) {  
         if (strTrim( channel , " ") != "")
         {
@@ -44,6 +53,7 @@ void Server::mode(std::string value, Client *client)
         if (args.empty())
         {
             sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "MODE"));
+            std::cout << "need more pram"<< std::endl;
             return;
         }
         else if (!args[0].empty() && args[0][0] == '#' && server_channels.find(args[0].substr(1)) != server_channels.end())
@@ -148,7 +158,17 @@ void Server::mode(std::string value, Client *client)
                             }
                             else if (modes[i][j] == 'k')
                             {
-                                if ( args.size() >= 3)
+
+                                 bool invalidmodeparam = false;
+                                    for(size_t i = 0; i < parameteres.size(); i++)
+                                    {
+                                        if (parameteres[i].find(" ") != std::string::npos)
+                                        {
+                                            sendData(client->clientSocket, ERR_INVALIDMODEPARAM(client->nickname, args[0], "k", parameteres[i]));
+                                            invalidmodeparam = true;
+                                        }
+                                    }
+                                if ( args.size() >= 3 && invalidmodeparam != true)
                                 {
                                       if (m == -1)
                                         modestr.append("+");
@@ -156,6 +176,8 @@ void Server::mode(std::string value, Client *client)
                                          modestr.append(1, modes[i][j]);
                                         modeargs.append(" "+args[2]+" ");
                                     server_channels.find(args[0].substr(1))->second->setpassword(args[2]);
+
+                                      
                                      if (server_channels.find(args[0].substr(1))->second->getmodes().find(modes[i][j]) == std::string::npos)
                                      {
                                         ss = server_channels.find(args[0].substr(1))->second->getmodes() + modes[i][j];
@@ -164,7 +186,7 @@ void Server::mode(std::string value, Client *client)
                                      }
                                         args.erase(args.begin() + 2);
                                 }
-                                else
+                                else if (invalidmodeparam == false)
                                     sendData(client->clientSocket, ERR_NEEDMOREPARAMS(client->nickname, "MODE"));
                             }
                             else if (modes[i][j] == 't' || modes[i][j] == 'i')
