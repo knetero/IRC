@@ -53,5 +53,6 @@
 #define ERR_CHANOPRIVSNEEDED(nickname, channelname)                         (HOSTNAME + " 482 " + nickname + " " + channelname + " :You're not channel operator" + CRLF)
 #define ERR_CHANOPRIVSNEEDED2(p1, p2)                                       HOSTNAME + " 482 " + p1 + " " + p2 + " :Your privileges are too low\r\n"
 #define ERR_INVALIDMODEPARAM(client, channel, mode, modep)                  HOSTNAME + " 696 " + client + " " + channel + " " + mode + " * :Invalid mode k parameter: " + modep + "\r\n"
+#define ERR_UNKNOWNMODE(client, modechar)                                   HOSTNAME + " 472 " + client + " " + modechar + " :is unknown mode char to me " + "\r\n"
 
 #endif

@@ -40,7 +40,7 @@ void Server::mode(std::string value, Client *client, std::vector<std::string> &p
         // std::string pass = value.substr(value.find(':'));
         // std::cout<< "pass    |"<<pass<< "|"<< std::endl;
         value = value.substr(0, value.find(':'));
-        std::cout<< "value    |"<<value<< "|"<< std::endl;
+        // std::cout<< "value    |"<<value<< "|"<< std::endl;
 
     }
     std::istringstream iss(value);
@@ -228,6 +228,8 @@ void Server::mode(std::string value, Client *client, std::vector<std::string> &p
                                     args.erase(args.begin() + 2);
                                 }
                             }
+                            else
+                                sendData(client->clientSocket, ERR_UNKNOWNMODE(client->nickname,modes[i][j]+""));
                             
 
                         }
@@ -242,6 +244,7 @@ void Server::mode(std::string value, Client *client, std::vector<std::string> &p
                     send_info(server_channels.find(args[0].substr(1))->second, msg);
                 }
             }
+            
 
         }
         else
